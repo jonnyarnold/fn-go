@@ -4,45 +4,57 @@ import (
 	"regexp"
 )
 
-// Saves some keys.
-func r(regex string) regexp.Regexp {
-	compiled := regexp.MustCompile(regex)
-	return *compiled
+// A TokenType maps a regular expression to a Tag.
+type TokenType struct {
+	Tag     string
+	Matcher regexp.Regexp
 }
 
-// TokenTypes maps regular expressions to their given TokenType.
-var TokenTypes = map[string]regexp.Regexp{
-	"comment": r("^#([^\n]*)"),
-	"space":   r("^[\\s\n]+"),
+func NewTokenType(tag string, matcher string) TokenType {
+	compiledRegexp := regexp.MustCompile(matcher)
 
-	"bracket_open":  r("^\\("),
-	"bracket_close": r("^\\)"),
+	return TokenType{
+		Tag:     tag,
+		Matcher: *compiledRegexp,
+	}
+}
 
-	"comma":         r("^,"),
-	"end_statement": r("^;"),
+func tt(tag string, matcher string) TokenType {
+	return NewTokenType(tag, matcher)
+}
+
+var TokenTypes = []TokenType{
+	tt("comment", "^#([^\n]*)"),
+	tt("space", "^[\\s\n]+"),
+
+	tt("bracket_open", "^\\("),
+	tt("bracket_close", "^\\)"),
+
+	tt("comma", "^,"),
+	tt("end_statement", "^;"),
 
 	// Reserved words/symbols
-	"use":    r("^use"),
-	"import": r("^import"),
-	"when":   r("^when"),
+	tt("use", "^use"),
+	tt("import", "^import"),
+	tt("when", "^when"),
 
 	// Infix operators
-	"infix_operator": r("^(\\+|\\-|\\*|/|\\.|=|eq|or|and)"),
+	tt("infix_operator", "^(\\+|\\-|\\*|/|\\.|=|eq|or|and)"),
 
 	// Blocks
-	"block_open":  r("^\\{"),
-	"block_close": r("^\\}"),
+	tt("block_open", "^\\{"),
+	tt("block_close", "^\\}"),
 
 	// Lists
-	"list_open":  r("^\\["),
-	"list_close": r("^\\]"),
+	tt("list_open", "^\\["),
+	tt("list_close", "^\\]"),
 
 	// Value literals
-	"string":  r("^\"([^\"]*)\""),
-	"number":  r("^([0-9]+(?:\\.[0-9]+)?)"),
-	"boolean": r("^(true|false)"),
+	tt("string", "^\"([^\"]*)\""),
+	tt("number", "^([0-9]+(\\.[0-9]+)?)"),
+	tt("boolean", "^(true|false)"),
 
-	// The above regexes shoulds catch all reserved expressions;
+	// The above regexes should catch all reserved expressions;
 	// This catches the rest.
-	"identifier": r("^([^\\#\\(\\)\\,\\;\\+\\-\\*\\/\\.\\=\\|\\>\\{\\}\"\\s])+"),
+	tt("identifier", "^([^\\#\\(\\)\\,\\;\\+\\-\\*\\/\\.\\=\\|\\>\\{\\}\"\\s])+"),
 }

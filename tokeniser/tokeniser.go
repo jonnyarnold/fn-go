@@ -7,13 +7,13 @@ func Tokenise(input string) []Token {
 
 	// Keep looping until we have eaten the whole array.
 	for input != "" {
-		for tokenType, regex := range TokenTypes {
+		for _, tokenType := range TokenTypes {
 
-			matches := regex.FindStringSubmatch(input)
+			matches := tokenType.Matcher.FindStringSubmatch(input)
 
 			if matches != nil {
 				tokens = append(tokens, Token{
-					Type:  tokenType,
+					Type:  tokenType.Tag,
 					Value: matches[0],
 				})
 
