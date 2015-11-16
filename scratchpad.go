@@ -12,13 +12,17 @@ func main() {
 
 	tokens := Tokenise(string(file))
 
-	for _, token := range tokens {
-		fmt.Println(token)
-	}
+	// for _, token := range tokens {
+	// 	fmt.Println(token)
+	// }
 
-	expressions := Parse(tokens)
+	expressions, errors := Parse(tokens)
 
 	for _, expression := range expressions {
 		fmt.Println(expression)
+	}
+
+	if errors != nil {
+		fmt.Println(errors)
 	}
 }
