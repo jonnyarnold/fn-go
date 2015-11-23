@@ -53,7 +53,7 @@ x eq y # => false
 ### Functions
 # Functions are assigned to variables.
 # Function prototypes are values.
-add = (a,b) { a + b }
+add = (a,b) { a + b } 
 add(2,3) # => 5
 
 
@@ -101,7 +101,7 @@ Utils.Math.area(3) # => 9
 
 
 ### Lists
-list = [1, "two", true]
+list = List(1, "two", true)
 
 # Lists are accessed by calling it as if it were a function.
 list(1) # => "two"
