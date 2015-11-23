@@ -3,11 +3,10 @@ package parser
 import (
 	"errors"
 	"fmt"
-	. "github.com/jonnyarnold/fn-go/tokeniser"
 )
 
 // Converts a list of Tokens into a list of Expressions.
-func Parse(tokens []Token) ([]Expression, error) {
+func Parse(tokens tokenList) ([]Expression, error) {
 	expressions := []Expression{}
 
 	for tokens != nil {
@@ -26,55 +25,90 @@ func Parse(tokens []Token) ([]Expression, error) {
 	return expressions, nil
 }
 
-func parsePrimary(tokens []Token) (Expression, []Token, error) {
-	switch tokens[0].Type {
-	case "comment", "space":
-		return nil, tokens[1:], nil
+func parsePrimary(tokens tokenList) (Expression, tokenList, error) {
+	switch tokens.Next().Type {
 	case "identifier", "number", "string", "boolean":
 		return parseValue(tokens)
 	}
 
 	return nil, tokens, errors.New(
-		fmt.Sprintf("Unexpected token type %s at start of expression", tokens[0].Type),
+		fmt.Sprintf("Unexpected token type %s at start of expression", tokens.Next().Type),
 	)
 }
 
-func parseValue(tokens []Token) (Expression, []Token, error) {
-	switch tokens[0].Type {
+func parseValue(tokens tokenList) (Expression, tokenList, error) {
+	// We need to parse the left and right hand side for the value.
+	var lhs Expression
+
+	switch tokens.Next().Type {
 
 	case "identifier":
-		return IdentifierExpression{Name: tokens[0].Value}, tokens[1:], nil
+		lhs, tokens = IdentifierExpression{Name: tokens.Next().Value}, tokens.Pop()
 
 	// Basic literals
 	case "number":
-		return NumberExpression{Value: tokens[0].Value}, tokens[1:], nil
+		lhs, tokens = NumberExpression{Value: tokens.Next().Value}, tokens.Pop()
 	case "string":
-		return StringExpression{Value: tokens[0].Value}, tokens[1:], nil
+		lhs, tokens = StringExpression{Value: tokens.Next().Value}, tokens.Pop()
 	case "boolean":
-		return BooleanExpression{Value: tokens[0].Value == "true"}, tokens[1:], nil
+		lhs, tokens = BooleanExpression{Value: tokens.Next().Value == "true"}, tokens.Pop()
 
 	// More complex structures
 	case "block_open":
-		return parseBlock(tokens)
+		lhs, tokens, _ = parseBlock(tokens)
 	}
 
-	return nil, tokens, errors.New(
-		fmt.Sprintf("Unexpected token type %s when parsing value", tokens[0].Type),
-	)
-}
-
-func parseBlock(tokens []Token) (Expression, []Token, error) {
-	if tokens[0].Type != "block_open" {
+	// Check we parsed the LHS
+	if lhs == nil {
 		return nil, tokens, errors.New(
-			fmt.Sprintf("Unexpected token type %s at start of block", tokens[0].Type),
+			fmt.Sprintf("Unexpected token type %s when parsing value", tokens.Next().Type),
 		)
 	}
 
-	tokens = tokens[1:] // Eat block_open
+	return parseInfixRhs(tokens, -1, lhs)
+}
+
+// parse the Right-Hand side of an expression.
+func parseInfixRhs(tokens tokenList, precedence float32, lhs Expression) (Expression, tokenList, error) {
+	for true {
+		beforeParsePrecedence := precedenceOf(tokens.Next())
+
+		if beforeParsePrecedence < precedence {
+			break
+		}
+
+		operation := tokens.Next().Value
+		tokens = tokens.Pop()
+
+		rhs, tokens, _ := parseValue(tokens)
+
+		// If, after parsing, the current token has a higher precedence,
+		// we need to use everything we have so far at the LHS of the higher expression.
+		if beforeParsePrecedence < precedenceOf(tokens.Next()) {
+			rhs, tokens, _ = parseInfixRhs(tokens, precedence+0.01, rhs)
+		}
+
+		lhs = FunctionCallExpression{
+			Identifier: IdentifierExpression{Name: operation},
+			Arguments:  []Expression{lhs, rhs},
+		}
+	}
+
+	return lhs, tokens, nil
+}
+
+func parseBlock(tokens tokenList) (Expression, tokenList, error) {
+	if tokens.Next().Type != "block_open" {
+		return nil, tokens, errors.New(
+			fmt.Sprintf("Unexpected token type %s at start of block", tokens.Next().Type),
+		)
+	}
+
+	tokens = tokens.Pop() // Eat block_open
 
 	// Eat the body
 	body := []Expression{}
-	for tokens != nil && tokens[0].Type != "block_close" {
+	for tokens != nil && tokens.Next().Type != "block_close" {
 		newExpression, remainingTokens, err := parsePrimary(tokens)
 
 		if newExpression != nil {
@@ -90,7 +124,7 @@ func parseBlock(tokens []Token) (Expression, []Token, error) {
 	// Check we're at a closing block.
 	if tokens == nil {
 		return nil, tokens, errors.New(
-			fmt.Sprintf("End of file reached before closing block", tokens[0].Type),
+			fmt.Sprintf("End of file reached before closing block", tokens.Next().Type),
 		)
 	}
 
