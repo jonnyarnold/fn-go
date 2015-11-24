@@ -8,6 +8,7 @@ import (
 type TokenType struct {
 	Tag     string
 	Matcher regexp.Regexp
+	Ignore  bool
 }
 
 func NewTokenType(tag string, matcher string) TokenType {
@@ -16,6 +17,17 @@ func NewTokenType(tag string, matcher string) TokenType {
 	return TokenType{
 		Tag:     tag,
 		Matcher: *compiledRegexp,
+		Ignore:  false,
+	}
+}
+
+func IgnoredTokenType(tag string, matcher string) TokenType {
+	compiledRegexp := regexp.MustCompile(matcher)
+
+	return TokenType{
+		Tag:     tag,
+		Matcher: *compiledRegexp,
+		Ignore:  true,
 	}
 }
 
@@ -23,9 +35,13 @@ func tt(tag string, matcher string) TokenType {
 	return NewTokenType(tag, matcher)
 }
 
+func ignored(tag string, matcher string) TokenType {
+	return IgnoredTokenType(tag, matcher)
+}
+
 var TokenTypes = []TokenType{
-	tt("comment", "^#([^\n]*)"),
-	tt("space", "^[\\s\n]+"),
+	ignored("comment", "^#([^\n]*)"),
+	ignored("space", "^[\\s\n]+"),
 
 	tt("bracket_open", "^\\("),
 	tt("bracket_close", "^\\)"),

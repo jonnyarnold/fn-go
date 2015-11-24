@@ -1,28 +1,43 @@
 package parser
 
 import (
-	. "github.com/jonnyarnold/fn-go/tokeniser"
+	"errors"
+	"fmt"
 )
 
 // Converts a list of Tokens into a list of Expressions.
-func Parse(tokens []Token) []Expression {
+func Parse(tokens tokenList) ([]Expression, error) {
 	expressions := []Expression{}
 
-	for tokens != nil {
-		newExpressions, remainingTokens := parsePrimary(tokens)
+	for tokens.Any() {
+		newExpression, remainingTokens, err := parsePrimary(tokens)
 
-		expressions = append(newExpressions, expressions)
+		if newExpression != nil {
+			expressions = append(expressions, newExpression)
+		} else if err != nil {
+			// Die on the first error.
+			return expressions, err
+		} else if len(remainingTokens) == len(tokens) {
+			return expressions, errors.New("Parser stalled!")
+		}
+
 		tokens = remainingTokens
 	}
 
-	return expressions
+	return expressions, nil
 }
 
-func parsePrimary(tokens []Token) ([]Expression, []Token) {
-	switch tokens[0].Type {
-	case "comment", "space":
-		return nil, tokens[1:]
+// Parse a top-level expression.
+// Primaries are of the form `value | import`
+func parsePrimary(tokens tokenList) (Expression, tokenList, error) {
+	switch tokens.Next().Type {
+	case "identifier", "number", "string", "boolean", "bracket_open", "when":
+		return parseValue(tokens)
 	}
 
-	panic("Could not parse!")
+	// TODO: import
+
+	return nil, tokens, errors.New(
+		fmt.Sprintf("Unexpected token type %s at start of expression", tokens.Next().Type),
+	)
 }

@@ -12,10 +12,13 @@ func Tokenise(input string) []Token {
 			matches := tokenType.Matcher.FindStringSubmatch(input)
 
 			if matches != nil {
-				tokens = append(tokens, Token{
-					Type:  tokenType.Tag,
-					Value: matches[0],
-				})
+
+				if !tokenType.Ignore {
+					tokens = append(tokens, Token{
+						Type:  tokenType.Tag,
+						Value: matches[0],
+					})
+				}
 
 				// Trim the length of the match from the front of the input.
 				input = input[len(matches[0]):]
