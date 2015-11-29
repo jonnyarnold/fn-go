@@ -1,11 +1,16 @@
 package runtime
 
+import (
+	"errors"
+	"strconv"
+)
+
 // A number is a scope representing a numeric value.
 type number struct {
 	value string
 }
 
-func (num number) Definitions() map[string]*scope {
+func (num number) Definitions() defMap {
 	return nil
 }
 
@@ -13,6 +18,23 @@ func (num number) String() string {
 	return num.value
 }
 
+func (num number) Call(args []fnScope) (fnScope, error) {
+	return nil, errors.New("Number called as a function!")
+}
+
+func (num number) AsFloat() float64 {
+	f, err := strconv.ParseFloat(num.value, 64)
+	if err != nil {
+		panic(err)
+	}
+
+	return f
+}
+
 func Number(num string) number {
 	return number{value: num}
+}
+
+func NumberFromFloat(num float64) number {
+	return Number(strconv.FormatFloat(num, 'f', -1, 64))
 }
