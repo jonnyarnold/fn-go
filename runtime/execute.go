@@ -6,45 +6,49 @@ import (
 	. "github.com/jonnyarnold/fn-go/parser"
 )
 
+type EvalResult struct {
+	Value fnScope
+	Scope fnScope
+	Error error
+}
+
 // Executes the given expressions in the default scope.
 func Execute(exprs []Expression) error {
-	_, _, err := ExecuteIn(exprs, DefaultScope)
-	return err
+	result := ExecuteIn(exprs, DefaultScope)
+	return result.Error
 }
 
 // Executes the expressions in the Scope.
-func ExecuteIn(exprs []Expression, scope fnScope) (fnScope, fnScope, error) {
-	var (
-		value fnScope
-		err   error
-	)
-
+func ExecuteIn(exprs []Expression, scope fnScope) EvalResult {
 	for _, expr := range exprs {
-		value, scope, err = exec(expr, scope)
-		if err != nil {
-			return value, scope, err
+		result := exec(expr, scope)
+		if result.Error != nil {
+			return result
 		}
-		fmt.Println(value)
+
+		fmt.Println(result.Value)
+
+		scope = result.Scope
 	}
 
-	return nil, scope, nil
+	return EvalResult{Scope: scope}
 }
 
 // Executes a single expression in the Scope.
-func exec(expr Expression, scope fnScope) (fnScope, fnScope, error) {
+func exec(expr Expression, scope fnScope) EvalResult {
 	switch expr.(type) {
 	case NumberExpression:
-		return execNumber(expr.(NumberExpression)), scope, nil
+		return EvalResult{Value: execNumber(expr.(NumberExpression)), Scope: scope}
 	case StringExpression:
-		return execString(expr.(StringExpression)), scope, nil
+		return EvalResult{Value: execString(expr.(StringExpression)), Scope: scope}
 	case BooleanExpression:
-		return execBool(expr.(BooleanExpression)), scope, nil
+		return EvalResult{Value: execBool(expr.(BooleanExpression)), Scope: scope}
 	case FunctionCallExpression:
 		return execFunctionCall(expr.(FunctionCallExpression), scope)
 	}
 
 	ignore(expr)
-	return nil, scope, nil
+	return EvalResult{Scope: scope}
 }
 
 func execNumber(expr NumberExpression) number {
@@ -61,31 +65,31 @@ func execBool(expr BooleanExpression) fnBool {
 
 // Executes the given function in the scope.
 // Returns the value of the function expression.
-func execFunctionCall(expr FunctionCallExpression, scope fnScope) (fnScope, fnScope, error) {
+func execFunctionCall(expr FunctionCallExpression, scope fnScope) EvalResult {
 	id, args := expr.Identifier.Name, expr.Arguments
 
 	fnToCall := scope.Definitions()[id]
 	if fnToCall == nil {
-		return nil, scope, errors.New(fmt.Sprintf("%s is not defined.", id))
+		return EvalResult{Error: errors.New(fmt.Sprintf("%s is not defined.", id))}
 	}
 
 	// TODO: Lazy evaluation?
 	evalArgs := []fnScope{}
 	for _, arg := range args {
-		evalArg, _, err := exec(arg, scope)
-		if err != nil {
-			return nil, scope, err
+		result := exec(arg, scope)
+		if result.Error != nil {
+			return result
 		}
 
-		evalArgs = append(evalArgs, evalArg)
+		evalArgs = append(evalArgs, result.Value)
 	}
 
 	value, err := fnToCall.Call(evalArgs)
 	if err != nil {
-		return value, scope, err
+		return EvalResult{Error: err}
 	}
 
-	return value, scope, nil
+	return EvalResult{Value: value, Scope: scope}
 }
 
 // Ignores the current expression.
