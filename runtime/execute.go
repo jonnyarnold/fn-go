@@ -74,14 +74,9 @@ func execFunctionCall(expr FunctionCallExpression, scope fnScope) EvalResult {
 	}
 
 	// TODO: Lazy evaluation?
-	evalArgs := []fnScope{}
-	for _, arg := range args {
-		result := exec(arg, scope)
-		if result.Error != nil {
-			return result
-		}
-
-		evalArgs = append(evalArgs, result.Value)
+	evalArgs, err := execArgs(args, scope)
+	if err != nil {
+		return EvalResult{Error: err}
 	}
 
 	value, err := fnToCall.Call(evalArgs)
@@ -90,6 +85,21 @@ func execFunctionCall(expr FunctionCallExpression, scope fnScope) EvalResult {
 	}
 
 	return EvalResult{Value: value, Scope: scope}
+}
+
+func execArgs(args []Expression, scope fnScope) ([]fnScope, error) {
+	// TODO: Lazy evaluation?
+	evalArgs := []fnScope{}
+	for _, arg := range args {
+		result := exec(arg, scope)
+		if result.Error != nil {
+			return nil, result.Error
+		}
+
+		evalArgs = append(evalArgs, result.Value)
+	}
+
+	return evalArgs, nil
 }
 
 // Ignores the current expression.
