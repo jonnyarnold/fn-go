@@ -2,6 +2,7 @@ package runtime
 
 import (
 	"errors"
+	"fmt"
 )
 
 type defaultScope struct {
@@ -10,6 +11,11 @@ type defaultScope struct {
 
 func (scope defaultScope) Definitions() defMap {
 	return scope.definitions
+}
+
+func (scope defaultScope) Define(id string, value fnScope) (fnScope, error) {
+	scope.definitions[id] = value
+	return scope, nil
 }
 
 func (scope defaultScope) String() string {
@@ -22,13 +28,15 @@ func (scope defaultScope) Call(args []fnScope) (fnScope, error) {
 
 var DefaultScope = defaultScope{
 	definitions: defMap{
-		"+":   fn([]string{"a", "b"}, add),
-		"-":   fn([]string{"a", "b"}, subtract),
-		"*":   fn([]string{"a", "b"}, multiply),
-		"/":   fn([]string{"a", "b"}, divide),
-		"and": fn([]string{"a", "b"}, and),
-		"or":  fn([]string{"a", "b"}, or),
-		"not": fn([]string{"a"}, not),
+		"+":     fn([]string{"a", "b"}, add),
+		"-":     fn([]string{"a", "b"}, subtract),
+		"*":     fn([]string{"a", "b"}, multiply),
+		"/":     fn([]string{"a", "b"}, divide),
+		"and":   fn([]string{"a", "b"}, and),
+		"or":    fn([]string{"a", "b"}, or),
+		"not":   fn([]string{"a"}, not),
+		"eq":    fn([]string{"a", "b"}, eq),
+		"print": fn([]string{"a"}, fnPrint),
 	},
 }
 
@@ -58,4 +66,13 @@ func or(args []fnScope) (fnScope, error) {
 
 func not(args []fnScope) (fnScope, error) {
 	return FnBool(!args[0].(fnBool).value), nil
+}
+
+func eq(args []fnScope) (fnScope, error) {
+	return FnBool(args[0] == args[1]), nil
+}
+
+func fnPrint(args []fnScope) (fnScope, error) {
+	fmt.Println(args[0].String())
+	return nil, nil
 }

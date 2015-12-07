@@ -13,6 +13,10 @@ func (str fnString) Definitions() defMap {
 	return nil
 }
 
+func (str fnString) Define(id string, value fnScope) (fnScope, error) {
+	panic("Attempted definition on a number!")
+}
+
 func (str fnString) String() string {
 	return str.value
 }

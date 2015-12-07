@@ -14,6 +14,10 @@ func (b fnBool) Definitions() defMap {
 	return nil
 }
 
+func (b fnBool) Define(id string, value fnScope) (fnScope, error) {
+	panic("Attempted definition on a number!")
+}
+
 func (b fnBool) String() string {
 	return strconv.FormatBool(b.value)
 }
