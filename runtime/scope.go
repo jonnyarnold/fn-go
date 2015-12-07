@@ -28,7 +28,14 @@ type Scope struct {
 }
 
 func (scope Scope) Definitions() defMap {
-	return scope.definitions
+	allDefs := scope.definitions
+	if scope.parent != nil {
+		for key, value := range (*scope.parent).Definitions() {
+			allDefs[key] = value
+		}
+	}
+
+	return allDefs
 }
 
 func (scope Scope) Define(id string, value fnScope) (fnScope, error) {
