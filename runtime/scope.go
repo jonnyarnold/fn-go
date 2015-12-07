@@ -8,6 +8,9 @@ type fnScope interface {
 	// Returns the definitions accessible in this scope.
 	Definitions() defMap
 
+	// Returns the current scope with the value defined.
+	Define(id string, value fnScope) (fnScope, error)
+
 	// Returns a string representation of the scope.
 	String() string
 

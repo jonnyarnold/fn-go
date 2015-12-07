@@ -6,6 +6,7 @@ import (
 	. "github.com/jonnyarnold/fn-go/parser"
 )
 
+// The result of an evaluation
 type EvalResult struct {
 	Value fnScope
 	Scope fnScope
@@ -68,6 +69,10 @@ func execBool(expr BooleanExpression) fnBool {
 func execFunctionCall(expr FunctionCallExpression, scope fnScope) EvalResult {
 	id, args := expr.Identifier.Name, expr.Arguments
 
+	if id == "=" {
+		return execDefinition(args[0].(IdentifierExpression), args[1], scope)
+	}
+
 	fnToCall := scope.Definitions()[id]
 	if fnToCall == nil {
 		return EvalResult{Error: errors.New(fmt.Sprintf("%s is not defined.", id))}
@@ -100,6 +105,17 @@ func execArgs(args []Expression, scope fnScope) ([]fnScope, error) {
 	}
 
 	return evalArgs, nil
+}
+
+func execDefinition(id IdentifierExpression, value Expression, scope fnScope) EvalResult {
+	execValue := exec(value, scope)
+	if execValue.Error != nil {
+		return execValue
+	}
+
+	return EvalResult{
+		Scope: scope.Define(id.Name, execValue.Value),
+	}
 }
 
 // Ignores the current expression.
