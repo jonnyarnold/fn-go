@@ -1,8 +1,8 @@
 package runtime
 
 import (
+	"bytes"
 	"errors"
-	"fmt"
 )
 
 type defMap map[string]fnScope
@@ -53,18 +53,19 @@ func (scope Scope) String() string {
 	if scope.definitions["value"] != nil {
 		return scope.definitions["value"].String()
 	} else {
-		fmt.Println("{\n")
+		var str bytes.Buffer
+		str.WriteString("{\n")
 
 		for id, value := range scope.definitions {
-			fmt.Println("  " + id + ": ")
-			fmt.Println(value.String())
-			fmt.Println("\n")
+			str.WriteString("  " + id + ": ")
+			str.WriteString(value.String())
+			str.WriteString("\n")
 		}
 
-		fmt.Println("}")
-	}
+		str.WriteString("}")
 
-	return "scope{}"
+		return str.String()
+	}
 }
 
 func (scope Scope) Call(args []fnScope) (fnScope, error) {

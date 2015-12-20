@@ -46,7 +46,9 @@ a = 1
 ### Equality
 x = 1
 y = 2
+z = 1
 x eq y # => false
+x eq z # => true
 
 
 

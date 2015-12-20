@@ -52,6 +52,8 @@ func exec(expr Expression, scope fnScope) EvalResult {
 		return execBlock(expr.(BlockExpression), scope)
 	case FunctionCallExpression:
 		return execFunctionCall(expr.(FunctionCallExpression), scope)
+	case ConditionalExpression:
+		return execConditional(expr.(ConditionalExpression), scope)
 	}
 
 	ignore(expr)

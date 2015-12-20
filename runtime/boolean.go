@@ -29,3 +29,15 @@ func (b fnBool) Call(args []fnScope) (fnScope, error) {
 func FnBool(value bool) fnBool {
 	return fnBool{value: value}
 }
+
+// The definition of truth.
+//
+// We follow Ruby's convention - only false is false.
+func AsBool(value fnScope) bool {
+	switch value.(type) {
+	case fnBool:
+		return value.(fnBool).value
+	}
+
+	return value != nil
+}
