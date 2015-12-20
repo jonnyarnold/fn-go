@@ -21,24 +21,18 @@ func Execute(exprs []Expression) error {
 
 // Executes the expressions in the Scope.
 func ExecuteIn(exprs []Expression, scope fnScope) EvalResult {
-	for _, expr := range exprs {
-		fmt.Print(expr)
+	var lastResult EvalResult
 
+	for _, expr := range exprs {
 		result := exec(expr, scope)
 		if result.Error != nil {
 			return result
 		}
 
-		if result.Value != nil {
-			fmt.Printf(" #=> %s", result.Value)
-		}
-
-		fmt.Print("\n")
-
-		scope = result.Scope
+		lastResult = result
 	}
 
-	return EvalResult{Scope: scope}
+	return lastResult
 }
 
 // Executes a single expression in the Scope.

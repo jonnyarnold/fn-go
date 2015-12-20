@@ -11,7 +11,7 @@ type number struct {
 }
 
 func (num number) Definitions() defMap {
-	return nil
+	return defMap{}
 }
 
 func (num number) Define(id string, value fnScope) (fnScope, error) {
@@ -33,6 +33,15 @@ func (num number) AsFloat() float64 {
 	}
 
 	return f
+}
+
+func (num number) AsInt() int64 {
+	i, err := strconv.ParseInt(num.value, 10, 64)
+	if err != nil {
+		panic(err)
+	}
+
+	return i
 }
 
 func Number(num string) number {

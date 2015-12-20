@@ -22,7 +22,7 @@ type functionScope struct {
 }
 
 func (fn functionScope) Definitions() defMap {
-	return nil
+	return defMap{}
 }
 
 func (fn functionScope) Define(id string, value fnScope) (fnScope, error) {
@@ -30,7 +30,7 @@ func (fn functionScope) Define(id string, value fnScope) (fnScope, error) {
 }
 
 func (fn functionScope) String() string {
-	return fmt.Sprintf("%s { ... }", fn.ArgumentNames)
+	return fmt.Sprintf("%s { ... }", fn.ArgumentNames.String())
 }
 
 func (fn functionScope) Call(args []fnScope) (fnScope, error) {

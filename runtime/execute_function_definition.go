@@ -13,6 +13,11 @@ func execFunctionPrototype(expr FunctionPrototypeExpression, scope fnScope) Eval
 		argNames = append(argNames, argExpr.Name)
 	}
 
+	innerScope := Scope{
+		parent:      &scope,
+		definitions: defMap{},
+	}
+
 	value := fn(argNames, func(argValues []fnScope) (fnScope, error) {
 		if len(argValues) != len(argNames) {
 			return nil, errors.New(fmt.Sprintf(
@@ -23,18 +28,19 @@ func execFunctionPrototype(expr FunctionPrototypeExpression, scope fnScope) Eval
 		}
 
 		// Assign args to the scope
-		var err error
 		for idx, name := range argNames {
-			scope, err = scope.Define(name, argValues[idx])
+			resultScope, err := innerScope.Define(name, argValues[idx])
 			if err != nil {
 				return nil, err
 			}
+
+			innerScope = resultScope.(Scope)
 		}
 
 		// Evaluate the function!
-		result := ExecuteIn(expr.Body.Body, scope)
+		result := ExecuteIn(expr.Body.Body, innerScope)
 		if result.Error != nil {
-			return nil, err
+			return nil, result.Error
 		}
 
 		return result.Value, nil

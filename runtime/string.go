@@ -10,7 +10,7 @@ type fnString struct {
 }
 
 func (str fnString) Definitions() defMap {
-	return nil
+	return defMap{}
 }
 
 func (str fnString) Define(id string, value fnScope) (fnScope, error) {

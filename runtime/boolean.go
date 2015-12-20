@@ -11,7 +11,7 @@ type fnBool struct {
 }
 
 func (b fnBool) Definitions() defMap {
-	return nil
+	return defMap{}
 }
 
 func (b fnBool) Define(id string, value fnScope) (fnScope, error) {

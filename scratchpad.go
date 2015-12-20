@@ -23,6 +23,10 @@ func main() {
 		fmt.Println(errors)
 	}
 
+	// for _, expr := range expressions {
+	// 	fmt.Println(expr)
+	// }
+
 	errors = Execute(expressions)
 
 	if errors != nil {

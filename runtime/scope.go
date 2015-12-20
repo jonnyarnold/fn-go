@@ -2,6 +2,7 @@ package runtime
 
 import (
 	"errors"
+	"fmt"
 )
 
 type defMap map[string]fnScope
@@ -29,9 +30,14 @@ type Scope struct {
 
 func (scope Scope) Definitions() defMap {
 	allDefs := scope.definitions
+
 	if scope.parent != nil {
 		for key, value := range (*scope.parent).Definitions() {
-			allDefs[key] = value
+
+			_, ok := allDefs[key]
+			if !ok {
+				allDefs[key] = value
+			}
 		}
 	}
 
@@ -47,8 +53,18 @@ func (scope Scope) String() string {
 	if scope.definitions["value"] != nil {
 		return scope.definitions["value"].String()
 	} else {
-		return "scope{}"
+		fmt.Println("{\n")
+
+		for id, value := range scope.definitions {
+			fmt.Println("  " + id + ": ")
+			fmt.Println(value.String())
+			fmt.Println("\n")
+		}
+
+		fmt.Println("}")
 	}
+
+	return "scope{}"
 }
 
 func (scope Scope) Call(args []fnScope) (fnScope, error) {

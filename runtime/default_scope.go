@@ -19,7 +19,7 @@ func (scope defaultScope) Define(id string, value fnScope) (fnScope, error) {
 }
 
 func (scope defaultScope) String() string {
-	return ""
+	return "DEFAULT"
 }
 
 func (scope defaultScope) Call(args []fnScope) (fnScope, error) {
@@ -37,6 +37,7 @@ var DefaultScope = defaultScope{
 		"not":   fn([]string{"a"}, not),
 		"eq":    fn([]string{"a", "b"}, eq),
 		"print": fn([]string{"a"}, fnPrint),
+		"List":  fnList{},
 	},
 }
 
