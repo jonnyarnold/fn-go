@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	. "github.com/jonnyarnold/fn-go/parser"
+	. "github.com/jonnyarnold/fn-go/runtime"
 	. "github.com/jonnyarnold/fn-go/tokeniser"
 	"io/ioutil"
 )
@@ -18,9 +19,15 @@ func main() {
 
 	expressions, errors := Parse(tokens)
 
-	for _, expression := range expressions {
-		fmt.Println(expression)
+	if errors != nil {
+		fmt.Println(errors)
 	}
+
+	// for _, expr := range expressions {
+	// 	fmt.Println(expr)
+	// }
+
+	errors = Execute(expressions)
 
 	if errors != nil {
 		fmt.Println(errors)

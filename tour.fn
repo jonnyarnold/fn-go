@@ -8,10 +8,10 @@
 1
 0.5
 3.14
-1 + 2 # => 3
-5 - 3 # => 2
-2 * 2 # => 4
-4 / 2 # => 2
+1 + 2   # => 3
+5 - 3.5 # => 1.5
+0.5 * 4 # => 2
+5 / 2   # => 2.5
 
 
 
@@ -46,7 +46,9 @@ a = 1
 ### Equality
 x = 1
 y = 2
+z = 1
 x eq y # => false
+x eq z # => true
 
 
 
@@ -113,8 +115,8 @@ list.each((item) {
 
 
 
-### Comparison
-# Only one structure exists for comparison: `when`.
+### Conditions
+# Only one structure exists for conditions: `when`.
 # This serves the purpose of `if/unless/else` as well as `case`.
 #
 # A `when` includes a collection of branches, with a condition and a block.

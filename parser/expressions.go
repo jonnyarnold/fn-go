@@ -1,6 +1,8 @@
 package parser
 
-type Expression interface{}
+type Expression interface {
+	String() string
+}
 
 // A number literal.
 type NumberExpression struct {
@@ -27,16 +29,20 @@ type BlockExpression struct {
 	Body []Expression
 }
 
+type arguments []IdentifierExpression
+
 // A function prototype (a literal).
 type FunctionPrototypeExpression struct {
-	Arguments []IdentifierExpression
+	Arguments arguments
 	Body      BlockExpression
 }
+
+type params []Expression
 
 // A function call.
 type FunctionCallExpression struct {
 	Identifier IdentifierExpression
-	Arguments  []Expression
+	Arguments  params
 }
 
 // A conditional expression.
