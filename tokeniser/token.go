@@ -13,3 +13,5 @@ type Token struct {
 func (t Token) String() string {
 	return fmt.Sprintf("[%s: %s]", t.Type, t.Value)
 }
+
+var NonToken = Token{}

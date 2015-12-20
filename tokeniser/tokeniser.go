@@ -147,22 +147,6 @@ func eatUntil(input string, tokens string) (string, string) {
 	return input[:breakCharIdx], input[breakCharIdx:]
 }
 
-func eatUntilWithEscape(input string, tokens string, escapeChar rune) (string, string) {
-	breakCharIdx := strings.IndexAny(input, tokens)
-
-	// No token found.
-	if breakCharIdx == -1 {
-		return input, ""
-	}
-
-	// Token is first character.
-	if breakCharIdx == 0 {
-		return "", input[1:]
-	}
-
-	return input[:breakCharIdx], input[breakCharIdx:]
-}
-
 // Eats the input string while the tokens in the tokens list are found.
 //
 // Returns the eaten string as the first argument,
