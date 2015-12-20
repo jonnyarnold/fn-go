@@ -61,10 +61,6 @@ var TokenTypes = []TokenType{
 	tt("block_open", "^\\{"),
 	tt("block_close", "^\\}"),
 
-	// Lists
-	tt("list_open", "^\\["),
-	tt("list_close", "^\\]"),
-
 	// Value literals
 	tt("string", "^\"([^\"]*)\""),
 	tt("number", "^([0-9]+(\\.[0-9]+)?)"),
