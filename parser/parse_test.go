@@ -116,10 +116,21 @@ func TestParser(t *testing.T) {
 		})
 
 		Convey("when statements become Conditional Expressions", func() {
-			exprs, err := Parse(tokensFor("when{}"))
+			exprs, err := Parse(tokensFor("when{ true { foo } }"))
 
 			So(exprs, ShouldResemble, []Expression{
-				ConditionalExpression{},
+				ConditionalExpression{
+					Branches: []ConditionalBranchExpression{
+						ConditionalBranchExpression{
+							Condition: BooleanExpression{Value: true},
+							Body: BlockExpression{
+								Body: []Expression{
+									IdentifierExpression{Name: "foo"},
+								},
+							},
+						},
+					},
+				},
 			})
 			So(err, ShouldBeNil)
 		})
@@ -128,63 +139,183 @@ func TestParser(t *testing.T) {
 
 	Convey("Infix Operators", t, func() {
 
-		Convey("become Function Call Expressions", nil)
+		Convey("become Function Call Expressions", func() {
+			exprs, err := Parse(tokensFor("a + b"))
 
-		Convey("with the same precedence are executed left-to-right", nil)
+			So(exprs, ShouldResemble, []Expression{
+				FunctionCallExpression{
+					Identifier: IdentifierExpression{Name: "+"},
+					Arguments: []Expression{
+						IdentifierExpression{Name: "a"},
+						IdentifierExpression{Name: "b"},
+					},
+				},
+			})
+			So(err, ShouldBeNil)
+		})
 
-		Convey("with different precedence are executed in precedence order", nil)
+		Convey("with the same precedence are executed left-to-right", func() {
+			exprs, err := Parse(tokensFor("a * b * c"))
+
+			So(exprs, ShouldResemble, []Expression{
+				FunctionCallExpression{
+					Identifier: IdentifierExpression{Name: "*"},
+					Arguments: []Expression{
+						IdentifierExpression{Name: "a"},
+						FunctionCallExpression{
+							Identifier: IdentifierExpression{Name: "*"},
+							Arguments: []Expression{
+								IdentifierExpression{Name: "b"},
+								IdentifierExpression{Name: "c"},
+							},
+						},
+					},
+				},
+			})
+			So(err, ShouldBeNil)
+		})
+
+		Convey("with different precedence are executed in precedence order", func() {
+			exprs, err := Parse(tokensFor("a + b * c"))
+
+			So(exprs, ShouldResemble, []Expression{
+				FunctionCallExpression{
+					Identifier: IdentifierExpression{Name: "+"},
+					Arguments: []Expression{
+						IdentifierExpression{Name: "a"},
+						FunctionCallExpression{
+							Identifier: IdentifierExpression{Name: "*"},
+							Arguments: []Expression{
+								IdentifierExpression{Name: "b"},
+								IdentifierExpression{Name: "c"},
+							},
+						},
+					},
+				},
+			})
+			So(err, ShouldBeNil)
+		})
 
 	})
 
 	Convey("Blocks", t, func() {
+		Convey("fail on non-primary statements", func() {
+			_, err := Parse(tokensFor("{=}"))
+			So(err, ShouldNotBeNil)
+		})
 
-		Convey("fail on non-primary statements", nil)
-
-		Convey("fail if the end of the tokens is reached before closing the block", nil)
-
+		Convey("fail if the end of the tokens is reached before closing the block", func() {
+			_, err := Parse(tokensFor("{foo"))
+			So(err, ShouldNotBeNil)
+		})
 	})
 
 	Convey("Brackets", t, func() {
+		Convey("fail on non-primary statements", func() {
+			_, err := Parse(tokensFor("(=)"))
+			So(err, ShouldNotBeNil)
+		})
 
-		Convey("enclose primary statements", nil)
+		Convey("fail if the end of the tokens is reached before closing the bracket", func() {
+			_, err := Parse(tokensFor("(foo"))
+			So(err, ShouldNotBeNil)
+		})
 
-		Convey("fail on non-primary statements", nil)
+		Convey("provides precedence", func() {
+			exprs, err := Parse(tokensFor("a * (b + c)"))
 
-		Convey("fail if the end of the tokens is reached before closing the brackets", nil)
-
-		Convey("provides precedence", nil)
+			So(exprs, ShouldResemble, []Expression{
+				FunctionCallExpression{
+					Identifier: IdentifierExpression{Name: "*"},
+					Arguments: []Expression{
+						IdentifierExpression{Name: "a"},
+						FunctionCallExpression{
+							Identifier: IdentifierExpression{Name: "+"},
+							Arguments: []Expression{
+								IdentifierExpression{Name: "b"},
+								IdentifierExpression{Name: "c"},
+							},
+						},
+					},
+				},
+			})
+			So(err, ShouldBeNil)
+		})
 
 	})
 
 	Convey("Function Calls", t, func() {
+		Convey("fail on non-value parameters", func() {
+			_, err := Parse(tokensFor("foo(=)"))
+			So(err, ShouldNotBeNil)
+		})
 
-		Convey("fail on non-value parameters", nil)
+		Convey("fail on an invalid parameter list", func() {
+			_, err := Parse(tokensFor("foo(a b)"))
+			So(err, ShouldNotBeNil)
+		})
 
-		Convey("fail on an invalid parameter list", nil)
-
-		Convey("fail if the parameter list is never closed", nil)
-
+		Convey("fail if the parameter list is never closed", func() {
+			_, err := Parse(tokensFor("foo(a"))
+			So(err, ShouldNotBeNil)
+		})
 	})
 
 	Convey("Function Definitions", t, func() {
+		Convey("fail on an invalid argument list", func() {
+			_, err := Parse(tokensFor("foo(a b) { true }"))
+			So(err, ShouldNotBeNil)
+		})
 
-		Convey("fail on non-identifier arguments", nil)
-
-		Convey("fail on an invalid argument list", nil)
-
-		Convey("fail if the argument list is never closed", nil)
-
+		Convey("fail if the argument list is never closed", func() {
+			_, err := Parse(tokensFor("foo(a { true }"))
+			So(err, ShouldNotBeNil)
+		})
 	})
 
 	Convey("Conditionals", t, func() {
 
-		Convey("fail if a block is not opened after the 'when'", nil)
+		Convey("fail if a block is not opened after the 'when'", func() {
+			_, err := Parse(tokensFor("when foo"))
+			So(err, ShouldNotBeNil)
+		})
 
-		Convey("fail if a non-value is passed as a condition", nil)
+		Convey("fail if a non-value is passed as a condition", func() {
+			_, err := Parse(tokensFor("when { = { true } }"))
+			So(err, ShouldNotBeNil)
+		})
 
-		Convey("fail if a block is not passed after a condition", nil)
+		Convey("fail if a block is not passed after a condition", func() {
+			_, err := Parse(tokensFor("when { foo }"))
+			So(err, ShouldNotBeNil)
+		})
 
-		Convey("can have multiple branches", nil)
+		Convey("can have multiple branches", func() {
+			exprs, err := Parse(tokensFor("when { false { foo } true { bar } }"))
+			So(exprs, ShouldResemble, []Expression{
+				ConditionalExpression{
+					Branches: []ConditionalBranchExpression{
+						ConditionalBranchExpression{
+							Condition: BooleanExpression{Value: false},
+							Body: BlockExpression{
+								Body: []Expression{
+									IdentifierExpression{Name: "foo"},
+								},
+							},
+						},
+						ConditionalBranchExpression{
+							Condition: BooleanExpression{Value: true},
+							Body: BlockExpression{
+								Body: []Expression{
+									IdentifierExpression{Name: "bar"},
+								},
+							},
+						},
+					},
+				},
+			})
+			So(err, ShouldBeNil)
+		})
 
 	})
 }

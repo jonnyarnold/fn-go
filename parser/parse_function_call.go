@@ -52,6 +52,10 @@ func parseParams(tokens tokenList) ([]Expression, tokenList, error) {
 
 		args = append(args, arg)
 
+		if !tokens.Any() {
+			return nil, tokens, errors.New("End of file reached before parameter list closed.")
+		}
+
 		switch tokens.Next().Type {
 		case "comma":
 			tokens = tokens.Pop()

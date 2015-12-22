@@ -11,15 +11,20 @@ import (
 //  function_definition | brackets | block | when`
 func parseValue(tokens tokenList) (Expression, tokenList, error) {
 	// We need to parse the left and right hand side for the value.
-	var lhs Expression
+	var (
+		lhs Expression
+		err error
+	)
+
+	fmt.Println(tokens)
 
 	switch tokens.Next().Type {
 
 	case "identifier":
 		// Peek forward to see if we have a function call
-		if tokens.Peek(1).Type == "bracket_open" {
+		if tokens.Length() > 1 && tokens.Peek(1).Type == "bracket_open" {
 			// TODO: Error checking!
-			lhs, tokens, _ = parseFunctionCall(tokens)
+			lhs, tokens, err = parseFunctionCall(tokens)
 		} else {
 			lhs = IdentifierExpression{Name: tokens.Next().Value}
 			tokens = tokens.Pop()
@@ -41,19 +46,23 @@ func parseValue(tokens tokenList) (Expression, tokenList, error) {
 		tokenAfterClosingBracket := tokens.AfterNext("bracket_close")
 
 		// TODO: Error checking!
-		if tokenAfterClosingBracket.Type == "block_open" {
-			lhs, tokens, _ = parseFunctionDefinition(tokens)
+		if tokenAfterClosingBracket != nil && tokenAfterClosingBracket.Type == "block_open" {
+			lhs, tokens, err = parseFunctionDefinition(tokens)
 		} else {
-			lhs, tokens, _ = parseBrackets(tokens)
+			lhs, tokens, err = parseBrackets(tokens)
 		}
 
 	case "block_open":
 		// TODO: Error checking!
-		lhs, tokens, _ = parseBlock(tokens)
+		lhs, tokens, err = parseBlock(tokens)
 
 	case "when":
 		// TODO: Error checking!
-		lhs, tokens, _ = parseWhen(tokens)
+		lhs, tokens, err = parseWhen(tokens)
+	}
+
+	if err != nil {
+		return nil, tokens, err
 	}
 
 	// Check we parsed the LHS
@@ -85,9 +94,9 @@ func parseInfixRhs(tokens tokenList, precedence float32, lhs Expression) (Expres
 
 		// If, after parsing, the current token has a higher precedence,
 		// we need to use everything we have so far at the LHS of the higher expression.
-		if beforeParsePrecedence < precedenceOf(tokens.Next()) {
+		if tokens.Any() && beforeParsePrecedence < precedenceOf(tokens.Next()) {
 			// TODO: Error checking!
-			rhs, tokens, _ = parseInfixRhs(tokens, precedence+0.01, rhs)
+			rhs, tokens, _ = parseInfixRhs(tokens, precedence, rhs)
 		}
 
 		lhs = FunctionCallExpression{
