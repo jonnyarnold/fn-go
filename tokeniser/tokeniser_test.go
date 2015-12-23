@@ -27,6 +27,7 @@ func TestTokeniser(t *testing.T) {
 
 	Convey("Comments", t, func() {
 		Convey("are ignored", func() {
+			SoCodeYieldsTokens("# This is a comment!", []Token{})
 			SoCodeYieldsTokens("# This is a comment!\n", []Token{})
 		})
 

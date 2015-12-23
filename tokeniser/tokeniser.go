@@ -1,25 +1,5 @@
 package tokeniser
 
-import (
-	"strings"
-)
-
-var basicTokens = map[rune]string{
-	'(': "bracket_open",
-	')': "bracket_close",
-	',': "comma",
-	';': "end_statement",
-	'{': "block_open",
-	'}': "block_close",
-}
-
-var numerics = "0123456789"
-
-var keywords = []string{"use", "import", "when"}
-
-var runeInfixOperators = []rune{'+', '-', '*', '/', '.', '='}
-var stringInfixOperators = []string{"eq", "and", "or"}
-
 // Tokenise() converts a string input into an
 // ordered array of Tokens.
 func Tokenise(input string) []Token {
@@ -31,128 +11,85 @@ func Tokenise(input string) []Token {
 
 	// Keep looping until we have eaten the whole array.
 	for !code.End() {
-		firstRune := code.Next()
-		line, col := code.CurrentLine, code.CurrentColumn
-
-		if firstRune == '#' {
-			// Comments
-			_ = code.EatUntil("\n")
-		} else if firstRune == ' ' || firstRune == '\n' {
-			// Spaces
-			_ = code.EatWhile(" \n")
-		} else if basicTokens[firstRune] != "" {
-			// Basic tokens (no value)
-			tokens = append(tokens, Token{
-				Type:   basicTokens[firstRune],
-				Line:   line,
-				Column: col,
-			})
-
-			code.Pop() // Eat token
-		} else if firstRune == '"' {
-			// Strings
-			code.Pop() // Eat opening "
-			str := code.EatUntil("\"")
-
-			tokens = append(tokens, Token{
-				Type:   "string",
-				Value:  str,
-				Line:   line,
-				Column: col,
-			})
-
-			code.Pop() // Eat closing "
-		} else if strings.ContainsRune(numerics, firstRune) {
-			// Numbers
-			num := code.EatWhile(numerics + ".")
-
-			tokens = append(tokens, Token{
-				Type:   "number",
-				Value:  num,
-				Line:   code.CurrentLine,
-				Column: code.CurrentColumn,
-			})
-		} else {
-			// Rune-based infix operator
-			runeFound := false
-			for _, r := range runeInfixOperators {
-				if firstRune == r {
-					tokens = append(tokens, Token{
-						Type:   "infix_operator",
-						Value:  string(firstRune),
-						Line:   line,
-						Column: col,
-					})
-
-					code.Pop()
-					runeFound = true
-					break
-				}
-			}
-
-			if runeFound {
-				continue
-			}
-
-			// Identifier/keyword
-			id := code.EatUntil(" \n#\"(){},;.=+-/*")
-
-			if id == "true" || id == "false" {
-				tokens = append(tokens, Token{
-					Type:   "boolean",
-					Value:  id,
-					Line:   line,
-					Column: col,
-				})
-
-				continue
-			}
-
-			// Check keywords
-			keywordFound := false
-			for _, keyword := range keywords {
-				if id == keyword {
-					tokens = append(tokens, Token{
-						Type:   keyword,
-						Line:   line,
-						Column: col,
-					})
-
-					keywordFound = true
-					break
-				}
-			}
-
-			if keywordFound {
-				continue
-			}
-
-			// Check infix operators
-			infixOpFound := false
-			for _, infixOp := range stringInfixOperators {
-				if id == infixOp {
-					tokens = append(tokens, Token{
-						Type:   "infix_operator",
-						Value:  id,
-						Line:   line,
-						Column: col,
-					})
-
-					infixOpFound = true
-					break
-				}
-			}
-
-			if !infixOpFound {
-				tokens = append(tokens, Token{
-					Type:   "identifier",
-					Value:  id,
-					Line:   line,
-					Column: col,
-				})
-			}
+		stripIgnored(&code)
+		if code.End() {
+			continue
 		}
+
+		tokens = append(tokens, nextToken(&code))
 	}
 
 	return tokens
+}
+
+// A symbol tokeniser works on the first token of the code.
+// They run before identifier tokenisers,
+// and require the CodeReader object for eating.
+type symbolTokeniser func(*CodeReader) *Token
+
+// An identifier tokeniser operates on a collected identifier
+// from the code. This simplifies operation, as we can work
+// on the identifier and not the full CodeReader.
+// They run after symbolTokenisers.
+type identifierTokeniser func(string) *Token
+
+func nextToken(code *CodeReader) Token {
+	line, col := code.CurrentLine, code.CurrentColumn
+
+	// Iterate through all of our possible symbol tokenisers,
+	// looking for the first that gives us a real token.
+	symbolTokenisers := []symbolTokeniser{
+		tryBasicTokens,
+		tryString,
+		tryNumber,
+		trySymbolInfixOperator,
+	}
+
+	var token *Token
+	for _, tryTokeniser := range symbolTokenisers {
+		token = tryTokeniser(code)
+		if token != nil {
+			break
+		}
+	}
+
+	if token == nil {
+
+		// Iterate through all of our possible identifier tokenisers,
+		// looking for the first that gives us a real token.
+		identifierTokenisers := []identifierTokeniser{
+			tryBoolean,
+			tryKeyword,
+			tryStringInfixOperator,
+		}
+
+		// Identifier/keyword
+		id := code.EatUntil(" \n#\"(){},;.=+-/*")
+		if id == "" {
+			panic("Empty identifier!")
+		}
+
+		for _, tryTokeniser := range identifierTokenisers {
+			token = tryTokeniser(id)
+			if token != nil {
+				break
+			}
+		}
+
+		// If no other tokenisers worked, we have a generic identifier.
+		if token == nil {
+			idToken := Token{
+				Type:  "identifier",
+				Value: id,
+			}
+
+			token = &idToken
+		}
+	}
+
+	// The Line and Column come from the first character of the token.
+	token.Line = line
+	token.Column = col
+
+	return *token
 }
