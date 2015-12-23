@@ -2,7 +2,6 @@ package tokeniser
 
 import (
 	"strings"
-	"unicode/utf8"
 )
 
 var basicTokens = map[rune]string{
@@ -24,51 +23,54 @@ var stringInfixOperators = []string{"eq", "and", "or"}
 // Tokenise() converts a string input into an
 // ordered array of Tokens.
 func Tokenise(input string) []Token {
-	var tokens = []Token{}
+	tokens := []Token{}
+	code, err := NewCodeReader(input)
+	if err != nil {
+		panic(err)
+	}
 
 	// Keep looping until we have eaten the whole array.
-	for input != "" {
-		firstRune, firstRuneSize := utf8.DecodeRuneInString(input)
+	for !code.End() {
+		firstRune := code.Next()
+		line, col := code.CurrentLine, code.CurrentColumn
 
 		if firstRune == '#' {
 			// Comments
-			_, input = eatUntil(input[firstRuneSize:], "\n")
+			_ = code.EatUntil("\n")
 		} else if firstRune == ' ' || firstRune == '\n' {
 			// Spaces
-			_, input = eatWhile(input[firstRuneSize:], " \n")
+			_ = code.EatWhile(" \n")
 		} else if basicTokens[firstRune] != "" {
 			// Basic tokens (no value)
 			tokens = append(tokens, Token{
-				Type: basicTokens[firstRune],
+				Type:   basicTokens[firstRune],
+				Line:   line,
+				Column: col,
 			})
 
-			input = input[1:]
+			code.Pop() // Eat token
 		} else if firstRune == '"' {
 			// Strings
-			var str string
-
-			// We need a special eatUntil, which checks for \"
-
-			str, input = eatUntil(input[firstRuneSize:], "\"")
+			code.Pop() // Eat opening "
+			str := code.EatUntil("\"")
 
 			tokens = append(tokens, Token{
-				Type:  "string",
-				Value: str,
+				Type:   "string",
+				Value:  str,
+				Line:   line,
+				Column: col,
 			})
 
-			// The first character in the stream will be the closing ".
-			// We don't want that.
-			if len(input) > 0 {
-				input = input[1:]
-			}
+			code.Pop() // Eat closing "
 		} else if strings.ContainsRune(numerics, firstRune) {
 			// Numbers
-			var num string
-			num, input = eatWhile(input, numerics+".")
+			num := code.EatWhile(numerics + ".")
 
 			tokens = append(tokens, Token{
-				Type:  "number",
-				Value: num,
+				Type:   "number",
+				Value:  num,
+				Line:   code.CurrentLine,
+				Column: code.CurrentColumn,
 			})
 		} else {
 			// Rune-based infix operator
@@ -76,11 +78,13 @@ func Tokenise(input string) []Token {
 			for _, r := range runeInfixOperators {
 				if firstRune == r {
 					tokens = append(tokens, Token{
-						Type:  "infix_operator",
-						Value: string(firstRune),
+						Type:   "infix_operator",
+						Value:  string(firstRune),
+						Line:   line,
+						Column: col,
 					})
 
-					input = input[firstRuneSize:]
+					code.Pop()
 					runeFound = true
 					break
 				}
@@ -91,13 +95,14 @@ func Tokenise(input string) []Token {
 			}
 
 			// Identifier/keyword
-			var id string
-			id, input = eatUntil(input, " \n#\"(){},;.=+-/*")
+			id := code.EatUntil(" \n#\"(){},;.=+-/*")
 
 			if id == "true" || id == "false" {
 				tokens = append(tokens, Token{
-					Type:  "boolean",
-					Value: id,
+					Type:   "boolean",
+					Value:  id,
+					Line:   line,
+					Column: col,
 				})
 
 				continue
@@ -108,7 +113,9 @@ func Tokenise(input string) []Token {
 			for _, keyword := range keywords {
 				if id == keyword {
 					tokens = append(tokens, Token{
-						Type: keyword,
+						Type:   keyword,
+						Line:   line,
+						Column: col,
 					})
 
 					keywordFound = true
@@ -125,8 +132,10 @@ func Tokenise(input string) []Token {
 			for _, infixOp := range stringInfixOperators {
 				if id == infixOp {
 					tokens = append(tokens, Token{
-						Type:  "infix_operator",
-						Value: id,
+						Type:   "infix_operator",
+						Value:  id,
+						Line:   line,
+						Column: col,
 					})
 
 					infixOpFound = true
@@ -136,56 +145,14 @@ func Tokenise(input string) []Token {
 
 			if !infixOpFound {
 				tokens = append(tokens, Token{
-					Type:  "identifier",
-					Value: id,
+					Type:   "identifier",
+					Value:  id,
+					Line:   line,
+					Column: col,
 				})
 			}
 		}
 	}
 
 	return tokens
-}
-
-// Eats the input string until one of the tokens is hit.
-//
-// Returns the eaten string as the first argument,
-// and the remainder as the second.
-//
-// eatUntil("abc", "a") == "", "abc"
-// eatUntil("abc", "b") == "a", "bc"
-// eatUntil("abc", "c") == "ab", "c"
-// eatUntil("abc", "d") == "abc", ""
-func eatUntil(input string, tokens string) (string, string) {
-	breakCharIdx := strings.IndexAny(input, tokens)
-
-	if breakCharIdx == -1 {
-		return input, ""
-	}
-
-	if breakCharIdx == 0 {
-		return "", input[1:]
-	}
-
-	return input[:breakCharIdx], input[breakCharIdx:]
-}
-
-// Eats the input string while the tokens in the tokens list are found.
-//
-// Returns the eaten string as the first argument,
-// and the remainder as the second.
-//
-// eatWhile("abc", "abc") == "abc", ""
-// eatWhile("abc", "ab") == "ab", "c"
-// eatWhile("abc", "a") == "a", "bc"
-// eatWhile("abc", "d") == "abc", ""
-func eatWhile(input string, tokens string) (string, string) {
-	breakCharIdx := strings.IndexFunc(input, func(r rune) bool {
-		return !strings.ContainsRune(tokens, r)
-	})
-
-	if breakCharIdx == -1 {
-		return input, ""
-	}
-
-	return input[:breakCharIdx], input[breakCharIdx:]
 }
