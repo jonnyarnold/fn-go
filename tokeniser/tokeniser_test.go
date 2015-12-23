@@ -87,9 +87,17 @@ func TestTokeniser(t *testing.T) {
 			})
 		})
 
-		Convey("are not found inside identifiers", func() {
+		Convey("without symbols are not found inside identifiers", func() {
 			So(Tokenise("aeqb"), ShouldResemble, []Token{
 				Token{Type: "identifier", Value: "aeqb"},
+			})
+		})
+
+		Convey("with symbols are found inside identifiers", func() {
+			So(Tokenise("a/b"), ShouldResemble, []Token{
+				Token{Type: "identifier", Value: "a"},
+				Token{Type: "infix_operator", Value: "/"},
+				Token{Type: "identifier", Value: "b"},
 			})
 		})
 	})

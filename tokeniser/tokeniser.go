@@ -18,7 +18,8 @@ var numerics = "0123456789"
 
 var keywords = []string{"use", "import", "when"}
 
-var infixOperators = []string{"+", "-", "*", "/", ".", "=", "eq", "and", "or"}
+var runeInfixOperators = []rune{'+', '-', '*', '/', '.', '='}
+var stringInfixOperators = []string{"eq", "and", "or"}
 
 // Tokenise() converts a string input into an
 // ordered array of Tokens.
@@ -70,9 +71,28 @@ func Tokenise(input string) []Token {
 				Value: num,
 			})
 		} else {
+			// Rune-based infix operator
+			runeFound := false
+			for _, r := range runeInfixOperators {
+				if firstRune == r {
+					tokens = append(tokens, Token{
+						Type:  "infix_operator",
+						Value: string(firstRune),
+					})
+
+					input = input[firstRuneSize:]
+					runeFound = true
+					break
+				}
+			}
+
+			if runeFound {
+				continue
+			}
+
 			// Identifier/keyword
 			var id string
-			id, input = eatUntil(input, " \n#\"(){},;")
+			id, input = eatUntil(input, " \n#\"(){},;.=+-/*")
 
 			if id == "true" || id == "false" {
 				tokens = append(tokens, Token{
@@ -96,27 +116,29 @@ func Tokenise(input string) []Token {
 				}
 			}
 
+			if keywordFound {
+				continue
+			}
+
 			// Check infix operators
-			if !keywordFound {
-				infixOpFound := false
-				for _, infixOp := range infixOperators {
-					if id == infixOp {
-						tokens = append(tokens, Token{
-							Type:  "infix_operator",
-							Value: id,
-						})
-
-						infixOpFound = true
-						break
-					}
-				}
-
-				if !infixOpFound {
+			infixOpFound := false
+			for _, infixOp := range stringInfixOperators {
+				if id == infixOp {
 					tokens = append(tokens, Token{
-						Type:  "identifier",
+						Type:  "infix_operator",
 						Value: id,
 					})
+
+					infixOpFound = true
+					break
 				}
+			}
+
+			if !infixOpFound {
+				tokens = append(tokens, Token{
+					Type:  "identifier",
+					Value: id,
+				})
 			}
 		}
 	}
