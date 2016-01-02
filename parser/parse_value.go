@@ -16,8 +16,6 @@ func parseValue(tokens tokenList) (Expression, tokenList, error) {
 		err error
 	)
 
-	fmt.Println(tokens)
-
 	switch tokens.Next().Type {
 
 	case "identifier":
