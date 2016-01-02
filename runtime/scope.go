@@ -3,6 +3,7 @@ package runtime
 import (
 	"bytes"
 	"errors"
+	"fmt"
 )
 
 type defMap map[string]fnScope
@@ -45,6 +46,10 @@ func (scope Scope) Definitions() defMap {
 }
 
 func (scope Scope) Define(id string, value fnScope) (fnScope, error) {
+	if scope.definitions[id] != nil {
+		return scope, errors.New(fmt.Sprintf("%s is already defined!", id))
+	}
+
 	scope.definitions[id] = value
 	return scope, nil
 }

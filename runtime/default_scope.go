@@ -14,6 +14,10 @@ func (scope defaultScope) Definitions() defMap {
 }
 
 func (scope defaultScope) Define(id string, value fnScope) (fnScope, error) {
+	if scope.definitions[id] != nil {
+		return scope, errors.New(fmt.Sprintf("%s is already defined!", id))
+	}
+
 	scope.definitions[id] = value
 	return scope, nil
 }
