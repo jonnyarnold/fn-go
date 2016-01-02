@@ -27,9 +27,9 @@ func main() {
 	// 	fmt.Println(expr)
 	// }
 
-	errors = Execute(expressions)
+	result := Execute(expressions)
 
-	if errors != nil {
-		fmt.Println(errors)
+	if result.Error != nil {
+		fmt.Println(result.Error)
 	}
 }
