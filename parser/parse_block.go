@@ -18,24 +18,20 @@ func parseBlock(tokens tokenList) (BlockExpression, tokenList, error) {
 
 	// Eat the body
 	body := []Expression{}
-	for tokens != nil && tokens.Next().Type != "block_close" {
+	for tokens.Any() && tokens.Next().Type != "block_close" {
 		newExpression, remainingTokens, err := parsePrimary(tokens)
 
-		if newExpression != nil {
-			body = append(body, newExpression)
-		} else if err != nil {
-			// Die on the first error.
+		if err != nil {
 			return BlockExpression{}, tokens, err
 		}
 
+		body = append(body, newExpression)
 		tokens = remainingTokens
 	}
 
 	// Check we're at a closing block.
-	if tokens == nil {
-		return BlockExpression{}, tokens, errors.New(
-			fmt.Sprintf("End of file reached before closing block", tokens.Next().Type),
-		)
+	if !tokens.Any() {
+		return BlockExpression{}, tokens, errors.New("End of file reached before closing block")
 	}
 
 	tokens = tokens.Pop() // Eat block_close

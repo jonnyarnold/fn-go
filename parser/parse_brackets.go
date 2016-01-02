@@ -20,6 +20,10 @@ func parseBrackets(tokens tokenList) (Expression, tokenList, error) {
 		return nil, tokens, err
 	}
 
+	if !tokens.Any() {
+		return nil, tokens, errors.New("Expected bracket_close but reached end of file")
+	}
+
 	if tokens.Next().Type != "bracket_close" {
 		return nil, tokens, errors.New(
 			fmt.Sprintf("Expected bracket_close, found %s in bracketed expression", tokens.Next().Type),

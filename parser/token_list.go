@@ -27,6 +27,10 @@ func (tokens tokenList) Peek(index int) Token {
 	return tokens[index]
 }
 
+func (tokens tokenList) Length() int {
+	return len(tokens)
+}
+
 // Returns a pointer to the first token _after_ the token
 // of the specified type.
 //
@@ -35,7 +39,11 @@ func (tokens tokenList) Peek(index int) Token {
 func (tokens tokenList) AfterNext(tokenType string) *Token {
 	for idx, token := range tokens {
 		if token.Type == tokenType {
-			return &tokens[idx+1]
+			if idx+1 == tokens.Length() {
+				return nil
+			} else {
+				return &tokens[idx+1]
+			}
 		}
 	}
 
