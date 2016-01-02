@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-func main() {
+func repl() {
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
