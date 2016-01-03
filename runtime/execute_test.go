@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	. "github.com/jonnyarnold/fn-go/parser"
 	. "github.com/smartystreets/goconvey/convey"
 	"testing"
 )
@@ -8,23 +9,63 @@ import (
 func TestExecute(t *testing.T) {
 	Convey("An empty expression list", t, func() {
 
-		Convey("returns no value", nil)
+		Convey("returns no value", func() {
+			result := Execute([]Expression{})
+			So(result.Value, ShouldBeNil)
+		})
 
-		Convey("returns no error", nil)
+		Convey("returns no error", func() {
+			result := Execute([]Expression{})
+			So(result.Error, ShouldBeNil)
+		})
 
 	})
 
-	Convey("Number expressions return numeric values", t, nil)
+	Convey("Number expressions return numeric values", t, func() {
+		result := Execute([]Expression{
+			NumberExpression{Value: "2.5"},
+		})
 
-	Convey("String expressions return string values", t, nil)
+		So(result.Value, ShouldResemble, number{value: "2.5"})
+		So(result.Error, ShouldBeNil)
+	})
 
-	Convey("Boolean expressions return boolean values", t, nil)
+	Convey("String expressions return string values", t, func() {
+		result := Execute([]Expression{
+			StringExpression{Value: "Hi"},
+		})
+
+		So(result.Value, ShouldResemble, fnString{value: "Hi"})
+		So(result.Error, ShouldBeNil)
+	})
+
+	Convey("Boolean expressions return boolean values", t, func() {
+		result := Execute([]Expression{
+			BooleanExpression{Value: false},
+		})
+
+		So(result.Value, ShouldResemble, fnBool{value: false})
+		So(result.Error, ShouldBeNil)
+	})
 
 	Convey("Identifier expressions", t, func() {
 
-		Convey("return an error if not defined", nil)
+		Convey("return an error if not defined", func() {
+			result := Execute([]Expression{
+				IdentifierExpression{Name: "notDefined"},
+			})
 
-		Convey("return the value if defined", nil)
+			So(result.Error, ShouldNotBeNil)
+		})
+
+		Convey("return the value if defined", func() {
+			result := Execute([]Expression{
+				IdentifierExpression{Name: "print"},
+			})
+
+			So(result.Value, ShouldNotBeNil)
+			So(result.Error, ShouldBeNil)
+		})
 
 	})
 
@@ -32,7 +73,17 @@ func TestExecute(t *testing.T) {
 
 		Convey("create a new child scope", nil)
 
-		Convey("return a Go func", nil)
+		Convey("return a functionScope", func() {
+			result := Execute([]Expression{
+				FunctionPrototypeExpression{
+					Arguments: []IdentifierExpression{},
+					Body:      BlockExpression{},
+				},
+			})
+
+			So(result.Value, ShouldHaveSameTypeAs, functionScope{})
+			So(result.Error, ShouldBeNil)
+		})
 
 	})
 
