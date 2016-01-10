@@ -30,19 +30,21 @@ func (scope defaultScope) Call(args []fnScope) (fnScope, error) {
 	return nil, errors.New("Default scope called as a function!")
 }
 
-var DefaultScope = defaultScope{
-	definitions: defMap{
-		"+":     fn([]string{"a", "b"}, add),
-		"-":     fn([]string{"a", "b"}, subtract),
-		"*":     fn([]string{"a", "b"}, multiply),
-		"/":     fn([]string{"a", "b"}, divide),
-		"and":   fn([]string{"a", "b"}, and),
-		"or":    fn([]string{"a", "b"}, or),
-		"not":   fn([]string{"a"}, not),
-		"eq":    fn([]string{"a", "b"}, eq),
-		"print": fn([]string{"a"}, fnPrint),
-		"List":  fnList{},
-	},
+func DefaultScope() defaultScope {
+	return defaultScope{
+		definitions: defMap{
+			"+":     fn([]string{"a", "b"}, add),
+			"-":     fn([]string{"a", "b"}, subtract),
+			"*":     fn([]string{"a", "b"}, multiply),
+			"/":     fn([]string{"a", "b"}, divide),
+			"and":   fn([]string{"a", "b"}, and),
+			"or":    fn([]string{"a", "b"}, or),
+			"not":   fn([]string{"a"}, not),
+			"eq":    fn([]string{"a", "b"}, eq),
+			"print": fn([]string{"a"}, fnPrint),
+			"List":  fnList{},
+		},
+	}
 }
 
 func add(args []fnScope) (fnScope, error) {

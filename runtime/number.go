@@ -15,7 +15,7 @@ func (num number) Definitions() defMap {
 }
 
 func (num number) Define(id string, value fnScope) (fnScope, error) {
-	panic("Attempted definition on a number!")
+	return nil, errors.New("Attempted definition on a number!")
 }
 
 func (num number) String() string {
