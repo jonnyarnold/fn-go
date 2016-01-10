@@ -269,6 +269,11 @@ func TestParser(t *testing.T) {
 			_, err := Parse(tokensFor("foo(a"))
 			So(err, ShouldNotBeNil)
 		})
+
+		Convey("permit valid parameter lists", func() {
+			_, err := Parse(tokensFor("foo(a, b)"))
+			So(err, ShouldBeNil)
+		})
 	})
 
 	Convey("Function Definitions", t, func() {
@@ -280,6 +285,16 @@ func TestParser(t *testing.T) {
 		Convey("fail if the argument list is never closed", func() {
 			_, err := Parse(tokensFor("foo(a { true }"))
 			So(err, ShouldNotBeNil)
+		})
+
+		Convey("fail if arguments are not identifiers", func() {
+			_, err := Parse(tokensFor("foo(a, =) { true }"))
+			So(err, ShouldNotBeNil)
+		})
+
+		Convey("permit valid argument lists", func() {
+			_, err := Parse(tokensFor("foo(a, b) { true }"))
+			So(err, ShouldBeNil)
 		})
 	})
 
