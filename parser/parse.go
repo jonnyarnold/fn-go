@@ -31,6 +31,8 @@ func Parse(tokens tokenList) ([]Expression, error) {
 // Primaries are of the form `value | import`
 func parsePrimary(tokens tokenList) (Expression, tokenList, error) {
 	switch tokens.Next().Type {
+	case "end_statement":
+		return nil, tokens[1:], nil
 	case "identifier", "number", "string", "boolean", "bracket_open", "when", "block_open":
 		return parseValue(tokens)
 	}

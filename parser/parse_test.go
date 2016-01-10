@@ -18,6 +18,16 @@ func TestParser(t *testing.T) {
 		So(err, ShouldBeNil)
 	})
 
+	Convey("Expressions can be delimited by end_statement tokens", t, func() {
+		exprs, err := Parse(tokensFor("foo; bar"))
+
+		So(exprs, ShouldResemble, []Expression{
+			IdentifierExpression{Name: "foo"},
+			IdentifierExpression{Name: "bar"},
+		})
+		So(err, ShouldBeNil)
+	})
+
 	Convey("Parsing value", t, func() {
 
 		Convey("identifiers become Identifier Expressions", func() {
