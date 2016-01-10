@@ -8,7 +8,7 @@ import (
 	"io/ioutil"
 )
 
-func main() {
+func tour() {
 	file, _ := ioutil.ReadFile("tour.fn")
 
 	tokens := Tokenise(string(file))
@@ -27,9 +27,9 @@ func main() {
 	// 	fmt.Println(expr)
 	// }
 
-	errors = Execute(expressions)
+	result := Execute(expressions)
 
-	if errors != nil {
-		fmt.Println(errors)
+	if result.Error != nil {
+		fmt.Println(result.Error)
 	}
 }
