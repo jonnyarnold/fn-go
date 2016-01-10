@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"errors"
 	. "github.com/jonnyarnold/fn-go/parser"
 )
 
@@ -14,7 +15,7 @@ func execConditional(expr ConditionalExpression, scope fnScope) EvalResult {
 		}
 	}
 
-	panic("End of when{} reached without matching branch!")
+	return EvalResult{Error: errors.New("End of when{} reached without matching branch!")}
 }
 
 func execBranch(expr ConditionalBranchExpression, scope fnScope) EvalResult {

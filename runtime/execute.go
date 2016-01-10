@@ -15,7 +15,7 @@ type EvalResult struct {
 
 // Executes the given expressions in the default scope.
 func Execute(exprs []Expression) EvalResult {
-	return ExecuteIn(exprs, DefaultScope)
+	return ExecuteIn(exprs, DefaultScope())
 }
 
 // Executes the expressions in the Scope.

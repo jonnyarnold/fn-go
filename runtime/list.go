@@ -16,7 +16,7 @@ func (list list) Definitions() defMap {
 		"each": fn([]string{"fn"}, list.each),
 	}
 
-	for key, value := range DefaultScope.Definitions() {
+	for key, value := range DefaultScope().Definitions() {
 
 		_, ok := allDefs[key]
 		if !ok {

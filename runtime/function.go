@@ -26,7 +26,7 @@ func (fn functionScope) Definitions() defMap {
 }
 
 func (fn functionScope) Define(id string, value fnScope) (fnScope, error) {
-	panic("Attempted definition on a function!")
+	return nil, errors.New("Attempted definition on a function!")
 }
 
 func (fn functionScope) String() string {

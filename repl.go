@@ -11,6 +11,7 @@ import (
 
 func repl() {
 	reader := bufio.NewReader(os.Stdin)
+	replScope := DefaultScope()
 
 	for {
 		fmt.Print("> ")
@@ -18,7 +19,7 @@ func repl() {
 
 		tokens := Tokenise(text)
 		expressions, _ := Parse(tokens)
-		result := Execute(expressions)
+		result := ExecuteIn(expressions, replScope)
 
 		if result.Error != nil {
 			fmt.Println(result.Error.Error())
