@@ -17,11 +17,15 @@ func execFunctionCall(expr FunctionCallExpression, scope fnScope) EvalResult {
 		return execDefinition(args[0].(IdentifierExpression), args[1], scope)
 	case ".":
 		return execDereference(args[0], args[1], scope)
+	case "import!":
+		return execInternalImport(args[0].(StringExpression), scope)
+	case "import":
+		return execVariableImport(args[0].(StringExpression), scope)
 	}
 
 	fnToCall := scope.Definitions()[id]
 	if fnToCall == nil {
-		return EvalResult{Error: errors.New(fmt.Sprintf("%s is not defined.", id))}
+		return EvalResult{Error: errors.New(fmt.Sprintf("%s is not a defined function.", id))}
 	}
 
 	// TODO: Lazy evaluation?
@@ -70,7 +74,7 @@ func execDefinition(id IdentifierExpression, value Expression, scope fnScope) Ev
 	}
 }
 
-// Execute a `=` function call.
+// Execute a `.` function call.
 func execDereference(parent Expression, child Expression, scope fnScope) EvalResult {
 	execParent := exec(parent, scope)
 	if execParent.Error != nil {

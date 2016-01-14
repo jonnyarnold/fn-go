@@ -1,6 +1,6 @@
 package tokeniser
 
-var keywords = []string{"use", "import", "when"}
+var keywords = []string{"when"}
 
 func tryKeyword(id string) *Token {
 	var (

@@ -1,0 +1,5 @@
+###### FN
+###### Import Test
+
+importedX = "This is importedX!"
+importedY = "This is importedY!"
