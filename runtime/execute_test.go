@@ -190,7 +190,7 @@ func TestExecute(t *testing.T) {
 			})
 
 			Convey("returns an error if ID already defined", func() {
-				result := eval("print = 1")
+				result := eval("x = 1; x = 2")
 
 				So(result.Error, ShouldNotBeNil)
 			})

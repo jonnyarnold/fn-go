@@ -68,22 +68,6 @@ func TestTokeniser(t *testing.T) {
 		})
 	})
 
-	Convey("Use is its own token", t, func() {
-		SoCodeYieldsTokens("us use user", []Token{
-			Token{Type: "identifier", Value: "us"},
-			Token{Type: "use"},
-			Token{Type: "identifier", Value: "user"},
-		})
-	})
-
-	Convey("Import is its own token", t, func() {
-		SoCodeYieldsTokens("impor import imports", []Token{
-			Token{Type: "identifier", Value: "impor"},
-			Token{Type: "import"},
-			Token{Type: "identifier", Value: "imports"},
-		})
-	})
-
 	Convey("When is its own token", t, func() {
 		SoCodeYieldsTokens("whe when whent", []Token{
 			Token{Type: "identifier", Value: "whe"},
