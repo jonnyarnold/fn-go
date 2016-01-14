@@ -214,6 +214,46 @@ func TestExecute(t *testing.T) {
 
 		})
 
+		Convey("import!", func() {
+
+			Convey("includes the file content directly into the current scope", func() {
+				result := eval("import!(\"test_import.fn\"); x")
+
+				So(result.Error, ShouldBeNil)
+				So(result.Value, ShouldResemble, number{value: "1"})
+			})
+
+			Convey("returns an error if the file does not exist", func() {
+				result := eval("import!(\"DOES-NOT-EXIST\")")
+
+				So(result.Error, ShouldNotBeNil)
+			})
+
+			Convey("returns an error if variables are already defined", func() {
+				result := eval("x = 1; import!(\"test_import.fn\")")
+
+				So(result.Error, ShouldNotBeNil)
+			})
+
+		})
+
+		Convey("import", func() {
+
+			Convey("includes the file content in the variable", func() {
+				result := eval("a = import(\"test_import.fn\"); a.x")
+
+				So(result.Error, ShouldBeNil)
+				So(result.Value, ShouldResemble, number{value: "1"})
+			})
+
+			Convey("returns an error if the file does not exist", func() {
+				result := eval("a = import(\"DOES-NOT-EXIST\")")
+
+				So(result.Error, ShouldNotBeNil)
+			})
+
+		})
+
 		Convey("for user-defined functions", func() {
 
 			Convey("returns nil", func() {
