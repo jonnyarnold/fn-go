@@ -12,8 +12,8 @@ func stripIgnored(code *CodeReader) {
 func stripSpaces(code *CodeReader) bool {
 	firstRune := code.Next()
 
-	if firstRune == ' ' || firstRune == '\n' {
-		_ = code.EatWhile(" \n")
+	if firstRune == ' ' || firstRune == '\n' || firstRune == '\r' {
+		_ = code.EatWhile(" \n\r")
 		return true
 	}
 
@@ -24,7 +24,7 @@ func stripSpaces(code *CodeReader) bool {
 // Returns true if comments were stripped.
 func stripComments(code *CodeReader) bool {
 	if code.Next() == '#' {
-		_ = code.EatUntil("\n")
+		_ = code.EatUntil("\n\r")
 		return true
 	}
 

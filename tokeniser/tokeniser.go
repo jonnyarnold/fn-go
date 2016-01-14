@@ -64,7 +64,7 @@ func nextToken(code *CodeReader) Token {
 		}
 
 		// Identifier/keyword
-		id := code.EatUntil(" \n#\"(){},;.=+-/*")
+		id := code.EatUntil(" \r\n#\"(){},;.=+-/*")
 		if id == "" {
 			panic("Empty identifier!")
 		}
