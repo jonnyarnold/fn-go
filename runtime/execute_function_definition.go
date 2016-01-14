@@ -29,12 +29,7 @@ func execFunctionPrototype(expr FunctionPrototypeExpression, scope fnScope) Eval
 
 		// Assign args to the scope
 		for idx, name := range argNames {
-			resultScope, err := innerScope.Define(name, argValues[idx])
-			if err != nil {
-				return nil, err
-			}
-
-			innerScope = resultScope.(Scope)
+			innerScope.definitions[name] = argValues[idx]
 		}
 
 		// Evaluate the function!

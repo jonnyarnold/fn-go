@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 )
@@ -23,27 +24,50 @@ func (scope defaultScope) Define(id string, value fnScope) (fnScope, error) {
 }
 
 func (scope defaultScope) String() string {
-	return "DEFAULT"
+	if scope.definitions["value"] != nil {
+		return scope.definitions["value"].String()
+	} else {
+		var str bytes.Buffer
+		str.WriteString("{\n")
+
+		for id, value := range scope.definitions {
+			str.WriteString("  " + id + ": ")
+			str.WriteString(value.String())
+			str.WriteString("\n")
+		}
+
+		str.WriteString("}")
+
+		return str.String()
+	}
 }
 
 func (scope defaultScope) Call(args []fnScope) (fnScope, error) {
 	return nil, errors.New("Default scope called as a function!")
 }
 
-func DefaultScope() defaultScope {
-	return defaultScope{
-		definitions: defMap{
-			"+":     fn([]string{"a", "b"}, add),
-			"-":     fn([]string{"a", "b"}, subtract),
-			"*":     fn([]string{"a", "b"}, multiply),
-			"/":     fn([]string{"a", "b"}, divide),
-			"and":   fn([]string{"a", "b"}, and),
-			"or":    fn([]string{"a", "b"}, or),
-			"not":   fn([]string{"a"}, not),
-			"eq":    fn([]string{"a", "b"}, eq),
-			"print": fn([]string{"a"}, fnPrint),
-			"List":  fnList{},
-		},
+// The top scope is the default scope used by files and REPLs.
+var topScope = defaultScope{
+	definitions: defMap{
+		"+":     fn([]string{"a", "b"}, add),
+		"-":     fn([]string{"a", "b"}, subtract),
+		"*":     fn([]string{"a", "b"}, multiply),
+		"/":     fn([]string{"a", "b"}, divide),
+		"and":   fn([]string{"a", "b"}, and),
+		"or":    fn([]string{"a", "b"}, or),
+		"not":   fn([]string{"a"}, not),
+		"eq":    fn([]string{"a", "b"}, eq),
+		"print": fn([]string{"a"}, fnPrint),
+		"List":  fnList{},
+	},
+}
+
+func DefaultScope() Scope {
+	var topFnScope fnScope = topScope
+
+	return Scope{
+		parent:      &topFnScope,
+		definitions: defMap{},
 	}
 }
 

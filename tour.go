@@ -8,7 +8,7 @@ import (
 	"io/ioutil"
 )
 
-func tour() {
+func main() {
 	file, _ := ioutil.ReadFile("tour.fn")
 
 	tokens := Tokenise(string(file))
