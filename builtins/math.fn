@@ -1,0 +1,11 @@
+# Math Library
+# 100% Fn!
+
+# Returns x^n.
+^ = (x, n) { 
+  when {
+    n eq 0 { 1 }
+    n eq 1 { x }
+    true { x * ^(x, n-1) }
+  }
+}
