@@ -6,6 +6,6 @@
   when {
     n eq 0 { 1 }
     n eq 1 { x }
-    true { x * ^(x, n-1) }
+    true   { x * ^(x, n-1) }
   }
 }
