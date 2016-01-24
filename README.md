@@ -13,4 +13,18 @@ Check out [the tour](tour.fn).
 
 ## How do I use it?
 
-Please don't. I don't know what I'm doing. If you use it and like, it let me know; if you don't like it, don't contact me. Thanks :)
+Please don't. I don't know what I'm doing. 
+
+...
+
+...
+
+Cool, if you ignored the above you can do:
+
+```
+go get github.com/jonnyarnold/fn-go
+$GOPATH/bin/fn-go
+```
+
+What can you do? Run the above and you will see how to run files or open a REPL.
+

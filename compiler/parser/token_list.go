@@ -1,7 +1,7 @@
 package parser
 
 import (
-	. "github.com/jonnyarnold/fn-go/tokeniser"
+	. "github.com/jonnyarnold/fn-go/compiler/tokeniser"
 )
 
 // A tokenList is a wrapper around a token array

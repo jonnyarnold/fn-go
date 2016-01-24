@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"github.com/jonnyarnold/fn-go/tokeniser"
+	"github.com/jonnyarnold/fn-go/compiler/tokeniser"
 	. "github.com/smartystreets/goconvey/convey"
 	"testing"
 )

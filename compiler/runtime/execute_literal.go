@@ -1,7 +1,7 @@
 package runtime
 
 import (
-	. "github.com/jonnyarnold/fn-go/parser"
+	. "github.com/jonnyarnold/fn-go/compiler/parser"
 )
 
 func execNumber(expr NumberExpression) number {
