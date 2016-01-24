@@ -1,15 +1,16 @@
-package main
+package repl
 
 import (
 	"bufio"
 	"fmt"
-	. "github.com/jonnyarnold/fn-go/parser"
-	. "github.com/jonnyarnold/fn-go/runtime"
-	. "github.com/jonnyarnold/fn-go/tokeniser"
+	. "github.com/jonnyarnold/fn-go/compiler/parser"
+	. "github.com/jonnyarnold/fn-go/compiler/runtime"
+	. "github.com/jonnyarnold/fn-go/compiler/tokeniser"
 	"os"
 )
 
-func repl() {
+// Starts the REPL and takes control.
+func Run() {
 	reader := bufio.NewReader(os.Stdin)
 	replScope := DefaultScope()
 

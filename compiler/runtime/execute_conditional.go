@@ -2,7 +2,7 @@ package runtime
 
 import (
 	"errors"
-	. "github.com/jonnyarnold/fn-go/parser"
+	. "github.com/jonnyarnold/fn-go/compiler/parser"
 )
 
 // Converts a FunctionPrototypeExression into a runtime function.

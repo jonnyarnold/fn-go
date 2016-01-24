@@ -3,7 +3,7 @@ package runtime
 import (
 	"errors"
 	"fmt"
-	. "github.com/jonnyarnold/fn-go/parser"
+	. "github.com/jonnyarnold/fn-go/compiler/parser"
 )
 
 // The result of an evaluation

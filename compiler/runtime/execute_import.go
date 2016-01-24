@@ -1,8 +1,8 @@
 package runtime
 
 import (
-	. "github.com/jonnyarnold/fn-go/parser"
-	. "github.com/jonnyarnold/fn-go/tokeniser"
+	. "github.com/jonnyarnold/fn-go/compiler/parser"
+	. "github.com/jonnyarnold/fn-go/compiler/tokeniser"
 	"io/ioutil"
 )
 
