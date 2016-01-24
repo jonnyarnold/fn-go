@@ -70,6 +70,7 @@ func execDefinition(id IdentifierExpression, value Expression, scope fnScope) Ev
 	}
 
 	return EvalResult{
+		Value: newScope,
 		Scope: newScope,
 	}
 }

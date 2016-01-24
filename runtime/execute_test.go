@@ -117,6 +117,13 @@ func TestExecute(t *testing.T) {
 			So(result.Error, ShouldBeNil)
 		})
 
+		Convey("can return blocks", func() {
+			result := eval("x = () { y = \"foo\" }; z = x(); z.y")
+
+			So(result.Error, ShouldBeNil)
+			So(result.Value, ShouldResemble, fnString{value: "foo"})
+		})
+
 	})
 
 	Convey("Block expressions", t, func() {
@@ -182,11 +189,13 @@ func TestExecute(t *testing.T) {
 				So(result.Value, ShouldResemble, number{value: "2"})
 			})
 
-			Convey("does not return a value", func() {
-				result := eval("x = 2")
+			Convey("returns the defining block", func() {
+				result := eval("foo = \"bar\"")
 
 				So(result.Error, ShouldBeNil)
-				So(result.Value, ShouldBeNil)
+				So(result.Value.(Scope).definitions, ShouldResemble, defMap{
+					"foo": fnString{value: "bar"},
+				})
 			})
 
 			Convey("returns an error if ID already defined", func() {
@@ -255,13 +264,6 @@ func TestExecute(t *testing.T) {
 		})
 
 		Convey("for user-defined functions", func() {
-
-			Convey("returns nil", func() {
-				result := eval("x = (a) { a }")
-
-				So(result.Error, ShouldBeNil)
-				So(result.Value, ShouldBeNil)
-			})
 
 			Convey("return an error on mismatched argument lengths", func() {
 				result := eval("x = (a) { a }; x(1, 2)")
