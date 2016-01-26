@@ -1,9 +1,11 @@
 package cli
 
 import (
+	"fmt"
 	"github.com/codegangsta/cli"
 	"github.com/jonnyarnold/fn-go/compiler"
 	"github.com/jonnyarnold/fn-go/repl"
+	"github.com/jonnyarnold/fn-go/vm"
 )
 
 type fnCli struct {
@@ -33,6 +35,14 @@ func buildCli() fnCli {
 			Usage:   "Starts an interactive REPL.",
 			Action: func(c *cli.Context) {
 				repl.Run()
+			},
+		},
+
+		{
+			Name:  "vm",
+			Usage: "Directly run bytecode in the VM.",
+			Action: func(c *cli.Context) {
+				fmt.Println(vm.RunBytecode())
 			},
 		},
 	}
