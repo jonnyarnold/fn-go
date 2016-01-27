@@ -122,7 +122,19 @@ func (m *Machine) ExecuteInstruction(instruction []byte) {
 	// DIVIDE result_register_id operand_register_1_id operand_register_2_id
 	// Divides the values of the two operand registers together and places them in the result register.
 	case DIVIDE:
-		m.Register[instruction[1]] = SubtractNumbers(m.Register[instruction[2]].(vmNumber), m.Register[instruction[3]].(vmNumber))
+		m.Register[instruction[1]] = DivideNumbers(m.Register[instruction[2]].(vmNumber), m.Register[instruction[3]].(vmNumber))
+		break
+
+	// AND result_register_id operand_register_1_id operand_register_2_id
+	// Takes the logical AND of the two operand registers.
+	case AND:
+		m.Register[instruction[1]] = m.Register[instruction[2]].(vmBool).Value && m.Register[instruction[3]].(vmBool).Value
+		break
+
+	// OR result_register_id operand_register_1_id operand_register_2_id
+	// Takes the logical OR of the two operand registers.
+	case OR:
+		m.Register[instruction[1]] = m.Register[instruction[2]].(vmBool).Value || m.Register[instruction[3]].(vmBool).Value
 		break
 
 	// DUMP

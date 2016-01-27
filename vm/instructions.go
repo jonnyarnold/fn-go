@@ -1,13 +1,23 @@
 package vm
 
-// Set of instruction types recognised by the VM.
+// Constants to allow reference to the instructions.
 const (
-	TERMINATE                  = 1
-	DECLARE_CONSTANT           = 2
-	SET_REGISTER_WITH_CONSTANT = 3
-	ADD                        = 4
-	SUBTRACT                   = 5
-	MULTIPLY                   = 6
-	DIVIDE                     = 7
-	DUMP                       = 0
+	// Program control
+	TERMINATE = iota
+	DUMP      = iota
+
+	// Declarations
+	DECLARE_CONSTANT           = iota
+	SET_REGISTER_WITH_CONSTANT = iota
+
+	// Artihmetic operations
+	ADD      = iota
+	SUBTRACT = iota
+	MULTIPLY = iota
+	DIVIDE   = iota
+
+	// Boolean operations
+	AND = iota
+	OR  = iota
+	NOT = iota
 )
