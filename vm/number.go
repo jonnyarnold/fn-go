@@ -5,8 +5,8 @@ import (
 )
 
 type vmNumber struct {
-	Type    int
-	Integer byte
+	Type    uint
+	Integer int
 	Float   float64
 }
 
@@ -30,6 +30,21 @@ func (n vmNumber) AsFloat() float64 {
 	}
 
 	panic("Unknown type!")
+}
+
+func (n vmNumber) AsInt() int {
+	switch n.Type {
+	case TYPE_INT:
+		return n.Integer
+	case TYPE_FLOAT:
+		return int(n.Float)
+	}
+
+	panic("Unknown type!")
+}
+
+func (n vmNumber) IsFalse() bool {
+	return false
 }
 
 func AddNumbers(first vmNumber, second vmNumber) vmNumber {
@@ -70,4 +85,8 @@ func MultiplyNumbers(first vmNumber, second vmNumber) vmNumber {
 
 func DivideNumbers(first vmNumber, second vmNumber) vmNumber {
 	return vmNumber{Type: TYPE_FLOAT, Float: first.AsFloat() / second.AsFloat()}
+}
+
+func (n vmNumber) Negate() vmConstant {
+	return vmNumber{Type: n.Type, Integer: -n.Integer, Float: -n.Float}
 }

@@ -2,13 +2,13 @@ package vm
 
 // Constants to allow reference to the instructions.
 const (
-	// Program control
-	TERMINATE = iota
-	DUMP      = iota
+	// Debugging
+	DUMP = iota
 
 	// Declarations
-	DECLARE_CONSTANT           = iota
-	SET_REGISTER_WITH_CONSTANT = iota
+	DECLARE          = iota
+	FUNCTION_FOLLOWS = iota
+	COPY             = iota
 
 	// Artihmetic operations
 	ADD      = iota
@@ -19,5 +19,12 @@ const (
 	// Boolean operations
 	AND = iota
 	OR  = iota
-	NOT = iota
+
+	// Unary operations
+	NEGATE = iota
+
+	// Control flow
+	JUMP_IF_FALSE = iota
+	CALL          = iota
+	RETURN        = iota
 )
