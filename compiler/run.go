@@ -3,8 +3,10 @@ package compiler
 import (
 	"fmt"
 	. "github.com/jonnyarnold/fn-go/compiler/parser"
-	. "github.com/jonnyarnold/fn-go/compiler/runtime"
+	// . "github.com/jonnyarnold/fn-go/compiler/runtime"
 	. "github.com/jonnyarnold/fn-go/compiler/tokeniser"
+	. "github.com/jonnyarnold/fn-go/compiler/transpiler"
+	. "github.com/jonnyarnold/fn-go/vm"
 	"io/ioutil"
 )
 
@@ -23,13 +25,24 @@ func Run(fileName string) {
 		fmt.Println(errors)
 	}
 
-	// for _, expr := range expressions {
-	// 	fmt.Println(expr)
-	// }
-
-	result := Execute(expressions)
-
-	if result.Error != nil {
-		fmt.Println(result.Error)
+	for _, expr := range expressions {
+		fmt.Println(expr)
 	}
+
+	result := Transpile(expressions)
+	for _, b := range result {
+		fmt.Printf("%02x ", b)
+	}
+	fmt.Print("\n")
+
+	machine := NewMachine(result)
+	machine.ProcessAll()
+	fmt.Println(machine.String())
+	fmt.Println(machine.Result())
+
+	// result := Execute(expressions)
+
+	// if result.Error != nil {
+	// 	fmt.Println(result.Error)
+	// }
 }

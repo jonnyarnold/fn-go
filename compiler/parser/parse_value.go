@@ -53,6 +53,9 @@ func parseValue(tokens tokenList) (Expression, tokenList, error) {
 	case "block_open":
 		// TODO: Error checking!
 		lhs, tokens, err = parseBlock(tokens)
+		if err != nil {
+			return nil, tokens, err
+		}
 
 	case "when":
 		// TODO: Error checking!

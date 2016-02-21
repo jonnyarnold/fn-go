@@ -55,3 +55,8 @@ type ConditionalBranchExpression struct {
 	Condition Expression
 	Body      BlockExpression
 }
+
+type AssignmentExpression struct {
+	Id    IdentifierExpression
+	Value Expression
+}

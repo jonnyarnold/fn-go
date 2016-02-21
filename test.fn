@@ -1,0 +1,74 @@
+# 1
+# 0.5
+# 3.14
+# "string"
+# true
+# false
+
+(2 + (3 + 1))
+# DATA 2 [D0]
+# DATA 3 [D1]
+# DATA 1 [D2]
+# LOAD D1 R0
+# LOAD D2 R1
+# ADD R0 R1 R0
+# LOAD D0 R1
+# ADD R0 R1 R0
+# RETURN
+
+x = 2
+y = (3 + 1)
+x + y
+# DATA 2
+# DATA 3
+# DATA 1
+# LOAD D0 R0
+# LOAD D1 R1
+# LOAD D2 R2
+# ADD R1 R2 R1
+# ADD R0 R1 R0
+# RETURN
+
+falsify = (x) {
+  when {
+    x    { not(x) }
+    true { x }
+  }
+}
+falsify(true)
+falsify(false)
+# R0 = Return Register
+# ReturnStack = Return Pointer Stack (for RETURN)
+#
+# [DATA not(R2) [D0]]
+# DATA true [D1]
+# DATA false [D2]
+# FUNCTION_FOLLOWS [*D3]
+#   JUMP_IF_FALSE R1
+#     CALL D0
+#   RETURN
+# LOAD D1 R1
+# CALL D3
+# LOAD D2 R1
+# CALL D3
+# RETURN
+
+Math = {
+  pi = 3.14
+  area = (diameter) { pi * diameter }
+}
+Math.area(1)
+# DATA 3.14 [D0]
+# DATA 1 [D1]
+# FUNCTION_FOLLOWS [*D2]
+#   MULTIPLY R1 R2 R0
+#   RETURN
+# LOAD D0 R1
+# LOAD D1 R2
+# CALL D2
+# RETURN
+
+Algorithm:
+- Get all constants and declare in DATA.
+- Declare functions with FUNCTION_FOLLOWS.
+- Use LOAD/CALL/Other ops as expected.

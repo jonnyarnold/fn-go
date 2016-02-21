@@ -1,7 +1,7 @@
 package vm
 
 import (
-	"github.com/jonnyarnold/fn-go/bytecode"
+	. "github.com/jonnyarnold/fn-go/bytecode"
 )
 
 func RunBytecode() string {
@@ -13,10 +13,10 @@ func RunBytecode() string {
 	// }
 	// x(false)
 	// x(true)
-	code := bytecode.New().
+	code := NewBytecode().
 		FunctionFollows(
-		bytecode.New().
-			JumpIfFalse(bytecode.New().
+		NewBytecode().
+			JumpIfFalse(NewBytecode().
 			Negate()).
 			Return()).
 		Dump().

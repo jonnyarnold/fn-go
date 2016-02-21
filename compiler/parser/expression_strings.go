@@ -104,3 +104,10 @@ func (cbe ConditionalBranchExpression) String() string {
 		cbe.Body.String(),
 	)
 }
+
+func (as AssignmentExpression) String() string {
+	return fmt.Sprintf("%s = %s",
+		as.Id.String(),
+		as.Value.String(),
+	)
+}

@@ -1,0 +1,63 @@
+# 1
+# 0.5
+# 3.14
+# "string"
+# true
+# false
+
+(2 + (3 + 1))
+# LOAD 3 R0
+# LOAD 1 R1
+# ADD R0 R1 R0
+# LOAD 2 R2
+# ADD R0 R2 R0
+# RETURN
+
+x = 2
+y = (3 + 1)
+x + y
+# LOAD 2 R0
+# LOAD 3 R1
+# LOAD 1 R2
+# ADD R1 R2 R1
+# ADD R0 R1 R0
+# RETURN
+
+falsify = (x) {
+  when {
+    x    { not(x) }
+    true { x }
+  }
+}
+falsify(true)
+falsify(false)
+# LOAD_FUNCTION *not F0
+# LOAD_FUNCTION F1
+#   JUMP_IF_FALSE R1
+#     CALL F0
+#   RETURN
+# LOAD true R1
+# CALL F1
+# LOAD false R1
+# CALL F1
+# RETURN
+
+Math = {
+  pi = 3.14
+  area = (diameter) { pi * diameter }
+}
+Math.area(1)
+# LOAD_FUNCTION F0
+#   MULTIPLY R1 R2 R0
+#   RETURN
+# LOAD 3.14 R1
+# LOAD 1 R2
+# CALL F0
+# RETURN
+
+# Translations:
+# `x = 1` => LOAD 1 Rx
+# `x = () { ... }` => LOAD_FUNCTION Fx; ...;
+# `x(a, b)` => COPY Ra R1; COPY Rb R2; CALL Fx
+# `when { x { ..a.. } else { ..b.. } }` => JUMP_IF_FALSE Rx; ..a..; ..b..
+

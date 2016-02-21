@@ -8,7 +8,7 @@ import (
 
 type Bytecode []byte
 
-func New() Bytecode {
+func NewBytecode() Bytecode {
 	return Bytecode{}
 }
 
