@@ -1,27 +1,40 @@
 package vm
 
+import (
+	"bytes"
+	"encoding/binary"
+	. "github.com/jonnyarnold/fn-go/bytecode"
+	"math"
+)
+
 type vmConstant interface {
 	String() string
 	Negate() vmConstant
 	IsFalse() bool
 }
 
-const (
-	TYPE_INT    = 0
-	TYPE_FLOAT  = 1
-	TYPE_STRING = 2
-	TYPE_BOOL   = 3
-)
-
 // Converts a []byte to a vmConstant
-func VMConstant(bytes []byte) vmConstant {
-	switch bytes[0] {
+func VMConstant(constType byte, valueBytes []byte) vmConstant {
+	switch constType {
 	case TYPE_INT:
-		return vmNumber{Type: TYPE_INT, Integer: int(bytes[1])}
+		byteBuffer := bytes.NewReader(valueBytes)
+		value, err := binary.ReadVarint(byteBuffer)
+		if err != nil {
+			panic(err)
+		}
+
+		return vmNumber{Type: TYPE_INT, Integer: value}
 	case TYPE_FLOAT:
-		return vmNumber{Type: TYPE_FLOAT, Float: float64(bytes[1])}
-	case TYPE_BOOL:
-		return vmBool{Value: bytes[1] != 0}
+		valueBits := binary.LittleEndian.Uint64(valueBytes)
+		value := math.Float64frombits(valueBits)
+
+		return vmNumber{Type: TYPE_FLOAT, Float: value}
+	case TYPE_TRUE:
+		return vmBool{Value: true}
+	case TYPE_FALSE:
+		return vmBool{Value: false}
+	case TYPE_STRING:
+		return vmString{Value: string(valueBytes)}
 	}
 
 	panic("Could not constantize!")

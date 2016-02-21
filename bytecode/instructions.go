@@ -1,4 +1,4 @@
-package vm
+package bytecode
 
 // Constants to allow reference to the instructions.
 const (

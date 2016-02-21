@@ -2,11 +2,12 @@ package vm
 
 import (
 	"fmt"
+	. "github.com/jonnyarnold/fn-go/bytecode"
 )
 
 type vmNumber struct {
 	Type    uint
-	Integer int
+	Integer int64
 	Float   float64
 }
 
@@ -32,12 +33,12 @@ func (n vmNumber) AsFloat() float64 {
 	panic("Unknown type!")
 }
 
-func (n vmNumber) AsInt() int {
+func (n vmNumber) AsInt() int64 {
 	switch n.Type {
 	case TYPE_INT:
 		return n.Integer
 	case TYPE_FLOAT:
-		return int(n.Float)
+		return int64(n.Float)
 	}
 
 	panic("Unknown type!")

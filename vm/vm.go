@@ -1,25 +1,34 @@
 package vm
 
+import (
+	"github.com/jonnyarnold/fn-go/bytecode"
+)
+
 func RunBytecode() string {
-	// x = (y) { when { y { not(y) } true { y } } }
+	// x = (y) {
+	//   when {
+	//     y { not(y) }
+	//     true { y }
+	//   }
+	// }
 	// x(false)
 	// x(true)
-	bytecode := []byte{
-		DECLARE, TYPE_BOOL, 0x00,
-		DECLARE, TYPE_BOOL, 0x01,
-		FUNCTION_FOLLOWS, 0x04, 0x00,
-		NEGATE, 0x00, 0x00,
-		JUMP_IF_FALSE, 0x02, 0x00,
-		NEGATE, 0x00, 0x00,
-		RETURN, 0x00, 0x00,
-		COPY, 0x00, 0x00,
-		CALL, 0x02, 0x00,
-		COPY, 0x01, 0x00,
-		CALL, 0x02, 0x00,
-		RETURN, 0x00, 0x00,
-	}
+	code := bytecode.New().
+		FunctionFollows(
+		bytecode.New().
+			JumpIfFalse(bytecode.New().
+			Negate()).
+			Return()).
+		Dump().
+		DeclareBool(false).
+		Call(0).
+		Dump().
+		DeclareBool(true).
+		Call(0).
+		Dump().
+		Return()
 
-	machine := NewMachine(bytecode)
+	machine := NewMachine(code)
 	machine.ProcessAll()
 	return machine.Result()
 }
