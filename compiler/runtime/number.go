@@ -11,7 +11,17 @@ type number struct {
 }
 
 func (num number) Definitions() defMap {
-	return defMap{}
+	return defMap{
+		"+":        fn([]string{"other"}, num.add),
+		"-":        fn([]string{"other"}, num.subtract),
+		"*":        fn([]string{"other"}, num.multiply),
+		"/":        fn([]string{"other"}, num.divide),
+		"and":      fn([]string{"other"}, num.and),
+		"or":       fn([]string{"other"}, num.or),
+		"eq":       fn([]string{"other"}, num.eq),
+		"moreThan": fn([]string{"other"}, num.moreThan),
+		"lessThan": fn([]string{"other"}, num.lessThan),
+	}
 }
 
 func (num number) Define(id string, value fnScope) (fnScope, error) {
@@ -24,6 +34,10 @@ func (num number) String() string {
 
 func (num number) Call(args []fnScope) (fnScope, error) {
 	return nil, errors.New("Number called as a function!")
+}
+
+func (num number) Value() interface{} {
+	return num.AsFloat()
 }
 
 func (num number) AsFloat() float64 {
@@ -50,4 +64,40 @@ func Number(num string) number {
 
 func NumberFromFloat(num float64) number {
 	return Number(strconv.FormatFloat(num, 'f', -1, 64))
+}
+
+func (num number) add(args []fnScope) (fnScope, error) {
+	return NumberFromFloat(num.AsFloat() + args[0].(number).AsFloat()), nil
+}
+
+func (num number) subtract(args []fnScope) (fnScope, error) {
+	return NumberFromFloat(num.AsFloat() - args[0].(number).AsFloat()), nil
+}
+
+func (num number) multiply(args []fnScope) (fnScope, error) {
+	return NumberFromFloat(num.AsFloat() * args[0].(number).AsFloat()), nil
+}
+
+func (num number) divide(args []fnScope) (fnScope, error) {
+	return NumberFromFloat(num.AsFloat() / args[0].(number).AsFloat()), nil
+}
+
+func (num number) moreThan(args []fnScope) (fnScope, error) {
+	return FnBool(num.AsFloat() > args[0].(number).AsFloat()), nil
+}
+
+func (num number) lessThan(args []fnScope) (fnScope, error) {
+	return FnBool(num.AsFloat() < args[0].(number).AsFloat()), nil
+}
+
+func (self number) and(args []fnScope) (fnScope, error) {
+	return FnBool(AsBool(self) && AsBool(args[0])), nil
+}
+
+func (self number) or(args []fnScope) (fnScope, error) {
+	return FnBool(AsBool(self) || AsBool(args[0])), nil
+}
+
+func (self number) eq(args []fnScope) (fnScope, error) {
+	return FnBool(self.Value() == args[0].Value()), nil
 }

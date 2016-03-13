@@ -45,6 +45,10 @@ func (fn functionScope) Call(args []fnScope) (fnScope, error) {
 	return fn.value(args)
 }
 
+func (fn functionScope) Value() interface{} {
+	return fn
+}
+
 // Helper for use when defining built-in functions.
 func fn(args []string, value fnFunc) functionScope {
 	return functionScope{

@@ -97,9 +97,17 @@ func parseInfixRhs(tokens tokenList, precedence float32, lhs Expression) (Expres
 			rhs, tokens, _ = parseInfixRhs(tokens, precedence, rhs)
 		}
 
+		// Functions are called on the LHS:
+		// x eq y === x.eq(y)
 		lhs = FunctionCallExpression{
-			Identifier: IdentifierExpression{Name: operation},
-			Arguments:  []Expression{lhs, rhs},
+			Identifier: IdentifierExpression{Name: "."},
+			Arguments: []Expression{
+				lhs,
+				FunctionCallExpression{
+					Identifier: IdentifierExpression{Name: operation},
+					Arguments:  []Expression{rhs},
+				},
+			},
 		}
 	}
 

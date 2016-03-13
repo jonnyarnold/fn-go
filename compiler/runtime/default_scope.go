@@ -46,17 +46,15 @@ func (scope defaultScope) Call(args []fnScope) (fnScope, error) {
 	return nil, errors.New("Default scope called as a function!")
 }
 
+func (scope defaultScope) Value() interface{} {
+	return scope
+}
+
 // The top scope is the default scope used by files and REPLs.
 var topScope = defaultScope{
 	definitions: defMap{
-		"+":     fn([]string{"a", "b"}, add),
-		"-":     fn([]string{"a", "b"}, subtract),
-		"*":     fn([]string{"a", "b"}, multiply),
-		"/":     fn([]string{"a", "b"}, divide),
-		"and":   fn([]string{"a", "b"}, and),
-		"or":    fn([]string{"a", "b"}, or),
+		"bool":  fn([]string{"a"}, asBool),
 		"not":   fn([]string{"a"}, not),
-		"eq":    fn([]string{"a", "b"}, eq),
 		"print": fn([]string{"a"}, fnPrint),
 		"List":  fnList{},
 	},
@@ -71,36 +69,12 @@ func DefaultScope() Scope {
 	}
 }
 
-func add(args []fnScope) (fnScope, error) {
-	return NumberFromFloat(args[0].(number).AsFloat() + args[1].(number).AsFloat()), nil
-}
-
-func subtract(args []fnScope) (fnScope, error) {
-	return NumberFromFloat(args[0].(number).AsFloat() - args[1].(number).AsFloat()), nil
-}
-
-func multiply(args []fnScope) (fnScope, error) {
-	return NumberFromFloat(args[0].(number).AsFloat() * args[1].(number).AsFloat()), nil
-}
-
-func divide(args []fnScope) (fnScope, error) {
-	return NumberFromFloat(args[0].(number).AsFloat() / args[1].(number).AsFloat()), nil
-}
-
-func and(args []fnScope) (fnScope, error) {
-	return FnBool(args[0].(fnBool).value && args[1].(fnBool).value), nil
-}
-
-func or(args []fnScope) (fnScope, error) {
-	return FnBool(args[0].(fnBool).value || args[1].(fnBool).value), nil
+func asBool(args []fnScope) (fnScope, error) {
+	return FnBool(AsBool(args[0])), nil
 }
 
 func not(args []fnScope) (fnScope, error) {
-	return FnBool(!args[0].(fnBool).value), nil
-}
-
-func eq(args []fnScope) (fnScope, error) {
-	return FnBool(args[0] == args[1]), nil
+	return FnBool(!AsBool(args[0])), nil
 }
 
 func fnPrint(args []fnScope) (fnScope, error) {

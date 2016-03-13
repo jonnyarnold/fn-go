@@ -11,7 +11,11 @@ type fnBool struct {
 }
 
 func (b fnBool) Definitions() defMap {
-	return defMap{}
+	return defMap{
+		"and": fn([]string{"other"}, b.and),
+		"or":  fn([]string{"other"}, b.or),
+		"eq":  fn([]string{"other"}, b.eq),
+	}
 }
 
 func (b fnBool) Define(id string, value fnScope) (fnScope, error) {
@@ -27,7 +31,8 @@ func (b fnBool) Call(args []fnScope) (fnScope, error) {
 }
 
 func FnBool(value bool) fnBool {
-	return fnBool{value: value}
+	b := fnBool{value: value}
+	return b
 }
 
 // The definition of truth.
@@ -40,4 +45,20 @@ func AsBool(value fnScope) bool {
 	}
 
 	return value != nil
+}
+
+func (b fnBool) Value() interface{} {
+	return b.value
+}
+
+func (self fnBool) and(args []fnScope) (fnScope, error) {
+	return FnBool(AsBool(self) && AsBool(args[0])), nil
+}
+
+func (self fnBool) or(args []fnScope) (fnScope, error) {
+	return FnBool(AsBool(self) || AsBool(args[0])), nil
+}
+
+func (self fnBool) eq(args []fnScope) (fnScope, error) {
+	return FnBool(self.Value() == args[0].Value()), nil
 }

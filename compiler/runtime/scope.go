@@ -22,6 +22,9 @@ type fnScope interface {
 
 	// Evalutes the scope as a function.
 	Call([]fnScope) (fnScope, error)
+
+	// Return the internal value of the scope for use in comparison.
+	Value() interface{}
 }
 
 type Scope struct {
@@ -79,4 +82,9 @@ func (scope Scope) Call(args []fnScope) (fnScope, error) {
 	}
 
 	return nil, errors.New("Scope cannot be called")
+}
+
+// Scopes are unique.
+func (scope Scope) Value() interface{} {
+	return scope
 }

@@ -59,6 +59,10 @@ func (list list) Call(args []fnScope) (fnScope, error) {
 	return list.Items[index], nil
 }
 
+func (list list) Value() interface{} {
+	return list.Items
+}
+
 func List(values []fnScope) (fnScope, error) {
 	return list{Items: values}, nil
 }
@@ -90,4 +94,8 @@ func (list fnList) String() string {
 
 func (list fnList) Call(args []fnScope) (fnScope, error) {
 	return List(args)
+}
+
+func (list fnList) Value() interface{} {
+	return nil
 }
