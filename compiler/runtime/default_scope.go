@@ -46,19 +46,28 @@ func (scope defaultScope) Call(args []fnScope) (fnScope, error) {
 	return nil, errors.New("Default scope called as a function!")
 }
 
+func (scope defaultScope) Value() interface{} {
+	return scope
+}
+
 // The top scope is the default scope used by files and REPLs.
 var topScope = defaultScope{
 	definitions: defMap{
-		"+":     fn([]string{"a", "b"}, add),
-		"-":     fn([]string{"a", "b"}, subtract),
-		"*":     fn([]string{"a", "b"}, multiply),
-		"/":     fn([]string{"a", "b"}, divide),
-		"and":   fn([]string{"a", "b"}, and),
-		"or":    fn([]string{"a", "b"}, or),
-		"not":   fn([]string{"a"}, not),
-		"eq":    fn([]string{"a", "b"}, eq),
+		"Boolean": fn([]string{"obj"}, asBool),
+		"List":    fnList{},
+		"String":  fn([]string{"obj"}, callOnFirstArgument("asString")),
+
+		"not": fn([]string{"a"}, not),
+		"and": fn([]string{"a", "b"}, and),
+		"or":  fn([]string{"a", "b"}, or),
+		"eq":  fn([]string{"a", "b"}, eq),
+
 		"print": fn([]string{"a"}, fnPrint),
-		"List":  fnList{},
+
+		"+": fn([]string{"a", "b"}, callOnFirstArgument("+")),
+		"-": fn([]string{"a", "b"}, callOnFirstArgument("-")),
+		"*": fn([]string{"a", "b"}, callOnFirstArgument("*")),
+		"/": fn([]string{"a", "b"}, callOnFirstArgument("/")),
 	},
 }
 
@@ -71,36 +80,30 @@ func DefaultScope() Scope {
 	}
 }
 
-func add(args []fnScope) (fnScope, error) {
-	return NumberFromFloat(args[0].(number).AsFloat() + args[1].(number).AsFloat()), nil
-}
-
-func subtract(args []fnScope) (fnScope, error) {
-	return NumberFromFloat(args[0].(number).AsFloat() - args[1].(number).AsFloat()), nil
-}
-
-func multiply(args []fnScope) (fnScope, error) {
-	return NumberFromFloat(args[0].(number).AsFloat() * args[1].(number).AsFloat()), nil
-}
-
-func divide(args []fnScope) (fnScope, error) {
-	return NumberFromFloat(args[0].(number).AsFloat() / args[1].(number).AsFloat()), nil
-}
-
-func and(args []fnScope) (fnScope, error) {
-	return FnBool(args[0].(fnBool).value && args[1].(fnBool).value), nil
-}
-
-func or(args []fnScope) (fnScope, error) {
-	return FnBool(args[0].(fnBool).value || args[1].(fnBool).value), nil
+func asBool(args []fnScope) (fnScope, error) {
+	return FnBool(AsBool(args[0])), nil
 }
 
 func not(args []fnScope) (fnScope, error) {
-	return FnBool(!args[0].(fnBool).value), nil
+	return FnBool(!AsBool(args[0])), nil
+}
+
+func callOnFirstArgument(op string) fnFunc {
+	return func(args []fnScope) (fnScope, error) {
+		return args[0].Definitions()[op].Call(args[1:2])
+	}
+}
+
+func and(args []fnScope) (fnScope, error) {
+	return FnBool(AsBool(args[0]) && AsBool(args[1])), nil
+}
+
+func or(args []fnScope) (fnScope, error) {
+	return FnBool(AsBool(args[0]) || AsBool(args[1])), nil
 }
 
 func eq(args []fnScope) (fnScope, error) {
-	return FnBool(args[0] == args[1]), nil
+	return FnBool(args[0].Value() == args[1].Value()), nil
 }
 
 func fnPrint(args []fnScope) (fnScope, error) {

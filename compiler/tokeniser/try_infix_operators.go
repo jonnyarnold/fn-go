@@ -5,7 +5,7 @@ import (
 )
 
 var symbolInfixOperators = "+-/*.="
-var stringInfixOperators = []string{"eq", "and", "or"}
+var stringInfixOperators = []string{"eq", "and", "or", "moreThan", "lessThan"}
 
 func trySymbolInfixOperator(code *CodeReader) *Token {
 	if !strings.ContainsRune(symbolInfixOperators, code.Next()) {

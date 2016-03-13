@@ -25,7 +25,7 @@ func execFunctionCall(expr FunctionCallExpression, scope fnScope) EvalResult {
 
 	fnToCall := scope.Definitions()[id]
 	if fnToCall == nil {
-		return EvalResult{Error: errors.New(fmt.Sprintf("%s is not a defined function.", id))}
+		return EvalResult{Error: errors.New(fmt.Sprintf("%s is not a defined function on:\n%s", id, scope.String()))}
 	}
 
 	// TODO: Lazy evaluation?

@@ -20,6 +20,11 @@ func Run() {
 
 		tokens := Tokenise(text)
 		expressions, _ := Parse(tokens)
+
+		for _, expr := range expressions {
+			fmt.Println(expr)
+		}
+
 		result := ExecuteIn(expressions, replScope)
 
 		if result.Error != nil {

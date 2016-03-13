@@ -51,11 +51,9 @@ func parseValue(tokens tokenList) (Expression, tokenList, error) {
 		}
 
 	case "block_open":
-		// TODO: Error checking!
 		lhs, tokens, err = parseBlock(tokens)
 
 	case "when":
-		// TODO: Error checking!
 		lhs, tokens, err = parseWhen(tokens)
 	}
 
@@ -75,7 +73,10 @@ func parseValue(tokens tokenList) (Expression, tokenList, error) {
 
 // Parse the Right-Hand side of an expression, respecting precedence.
 func parseInfixRhs(tokens tokenList, precedence float32, lhs Expression) (Expression, tokenList, error) {
-	var rhs Expression
+	var (
+		rhs Expression
+		err error
+	)
 
 	for tokens.Any() {
 		beforeParsePrecedence := precedenceOf(tokens.Next())
@@ -87,19 +88,26 @@ func parseInfixRhs(tokens tokenList, precedence float32, lhs Expression) (Expres
 		operation := tokens.Next().Value
 		tokens = tokens.Pop() // Eat infix_operator
 
-		// TODO: Error checking!
-		rhs, tokens, _ = parseValue(tokens)
+		rhs, tokens, err = parseValue(tokens)
+		if err != nil {
+			return rhs, tokens, err
+		}
 
 		// If, after parsing, the current token has a higher precedence,
 		// we need to use everything we have so far at the LHS of the higher expression.
 		if tokens.Any() && beforeParsePrecedence < precedenceOf(tokens.Next()) {
-			// TODO: Error checking!
-			rhs, tokens, _ = parseInfixRhs(tokens, precedence, rhs)
+			rhs, tokens, err = parseInfixRhs(tokens, precedence, rhs)
+			if err != nil {
+				return rhs, tokens, err
+			}
 		}
 
 		lhs = FunctionCallExpression{
 			Identifier: IdentifierExpression{Name: operation},
-			Arguments:  []Expression{lhs, rhs},
+			Arguments: []Expression{
+				lhs,
+				rhs,
+			},
 		}
 	}
 

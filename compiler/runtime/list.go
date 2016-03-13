@@ -13,7 +13,8 @@ type list struct {
 
 func (list list) Definitions() defMap {
 	allDefs := defMap{
-		"each": fn([]string{"fn"}, list.each),
+		"each":     fn([]string{"fn"}, list.each),
+		"asString": fn([]string{}, list.asString),
 	}
 
 	for key, value := range DefaultScope().Definitions() {
@@ -59,6 +60,10 @@ func (list list) Call(args []fnScope) (fnScope, error) {
 	return list.Items[index], nil
 }
 
+func (list list) Value() interface{} {
+	return list.Items
+}
+
 func List(values []fnScope) (fnScope, error) {
 	return list{Items: values}, nil
 }
@@ -72,6 +77,10 @@ func (list list) each(args []fnScope) (fnScope, error) {
 	}
 
 	return nil, nil
+}
+
+func (list list) asString(args []fnScope) (fnScope, error) {
+	return FnString(list.String()), nil
 }
 
 type fnList struct{}
@@ -90,4 +99,8 @@ func (list fnList) String() string {
 
 func (list fnList) Call(args []fnScope) (fnScope, error) {
 	return List(args)
+}
+
+func (list fnList) Value() interface{} {
+	return nil
 }
