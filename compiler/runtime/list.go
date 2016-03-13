@@ -13,7 +13,8 @@ type list struct {
 
 func (list list) Definitions() defMap {
 	allDefs := defMap{
-		"each": fn([]string{"fn"}, list.each),
+		"each":     fn([]string{"fn"}, list.each),
+		"asString": fn([]string{}, list.asString),
 	}
 
 	for key, value := range DefaultScope().Definitions() {
@@ -76,6 +77,10 @@ func (list list) each(args []fnScope) (fnScope, error) {
 	}
 
 	return nil, nil
+}
+
+func (list list) asString(args []fnScope) (fnScope, error) {
+	return FnString(list.String()), nil
 }
 
 type fnList struct{}

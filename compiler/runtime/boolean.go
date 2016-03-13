@@ -12,9 +12,7 @@ type fnBool struct {
 
 func (b fnBool) Definitions() defMap {
 	return defMap{
-		"and": fn([]string{"other"}, b.and),
-		"or":  fn([]string{"other"}, b.or),
-		"eq":  fn([]string{"other"}, b.eq),
+		"asString": fn([]string{}, b.asString),
 	}
 }
 
@@ -51,14 +49,6 @@ func (b fnBool) Value() interface{} {
 	return b.value
 }
 
-func (self fnBool) and(args []fnScope) (fnScope, error) {
-	return FnBool(AsBool(self) && AsBool(args[0])), nil
-}
-
-func (self fnBool) or(args []fnScope) (fnScope, error) {
-	return FnBool(AsBool(self) || AsBool(args[0])), nil
-}
-
-func (self fnBool) eq(args []fnScope) (fnScope, error) {
-	return FnBool(self.Value() == args[0].Value()), nil
+func (b fnBool) asString(args []fnScope) (fnScope, error) {
+	return FnString(b.String()), nil
 }

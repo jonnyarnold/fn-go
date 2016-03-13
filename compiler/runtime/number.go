@@ -21,6 +21,7 @@ func (num number) Definitions() defMap {
 		"eq":       fn([]string{"other"}, num.eq),
 		"moreThan": fn([]string{"other"}, num.moreThan),
 		"lessThan": fn([]string{"other"}, num.lessThan),
+		"asString": fn([]string{}, num.asString),
 	}
 }
 
@@ -100,4 +101,8 @@ func (self number) or(args []fnScope) (fnScope, error) {
 
 func (self number) eq(args []fnScope) (fnScope, error) {
 	return FnBool(self.Value() == args[0].Value()), nil
+}
+
+func (self number) asString(args []fnScope) (fnScope, error) {
+	return FnString(self.String()), nil
 }

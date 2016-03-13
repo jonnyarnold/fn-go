@@ -21,8 +21,10 @@ type functionScope struct {
 	value         fnFunc
 }
 
-func (fn functionScope) Definitions() defMap {
-	return defMap{}
+func (fs functionScope) Definitions() defMap {
+	return defMap{
+		"asString": fn([]string{}, fs.asString),
+	}
 }
 
 func (fn functionScope) Define(id string, value fnScope) (fnScope, error) {
@@ -55,4 +57,8 @@ func fn(args []string, value fnFunc) functionScope {
 		ArgumentNames: args,
 		value:         value,
 	}
+}
+
+func (fn functionScope) asString(args []fnScope) (fnScope, error) {
+	return FnString(fn.String()), nil
 }

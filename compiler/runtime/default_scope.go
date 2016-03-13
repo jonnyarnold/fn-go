@@ -53,10 +53,21 @@ func (scope defaultScope) Value() interface{} {
 // The top scope is the default scope used by files and REPLs.
 var topScope = defaultScope{
 	definitions: defMap{
-		"bool":  fn([]string{"a"}, asBool),
-		"not":   fn([]string{"a"}, not),
+		"Boolean": fn([]string{"obj"}, asBool),
+		"List":    fnList{},
+		"String":  fn([]string{"obj"}, callOnFirstArgument("asString")),
+
+		"not": fn([]string{"a"}, not),
+		"and": fn([]string{"a", "b"}, and),
+		"or":  fn([]string{"a", "b"}, or),
+		"eq":  fn([]string{"a", "b"}, eq),
+
 		"print": fn([]string{"a"}, fnPrint),
-		"List":  fnList{},
+
+		"+": fn([]string{"a", "b"}, callOnFirstArgument("+")),
+		"-": fn([]string{"a", "b"}, callOnFirstArgument("-")),
+		"*": fn([]string{"a", "b"}, callOnFirstArgument("*")),
+		"/": fn([]string{"a", "b"}, callOnFirstArgument("/")),
 	},
 }
 
@@ -75,6 +86,24 @@ func asBool(args []fnScope) (fnScope, error) {
 
 func not(args []fnScope) (fnScope, error) {
 	return FnBool(!AsBool(args[0])), nil
+}
+
+func callOnFirstArgument(op string) fnFunc {
+	return func(args []fnScope) (fnScope, error) {
+		return args[0].Definitions()[op].Call(args[1:2])
+	}
+}
+
+func and(args []fnScope) (fnScope, error) {
+	return FnBool(AsBool(args[0]) && AsBool(args[1])), nil
+}
+
+func or(args []fnScope) (fnScope, error) {
+	return FnBool(AsBool(args[0]) || AsBool(args[1])), nil
+}
+
+func eq(args []fnScope) (fnScope, error) {
+	return FnBool(args[0].Value() == args[1].Value()), nil
 }
 
 func fnPrint(args []fnScope) (fnScope, error) {

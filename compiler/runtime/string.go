@@ -11,9 +11,10 @@ type fnString struct {
 
 func (str fnString) Definitions() defMap {
 	return defMap{
-		"eq":  fn([]string{"other"}, str.eq),
-		"and": fn([]string{"other"}, str.and),
-		"or":  fn([]string{"other"}, str.or),
+		"eq":       fn([]string{"other"}, str.eq),
+		"and":      fn([]string{"other"}, str.and),
+		"or":       fn([]string{"other"}, str.or),
+		"asString": fn([]string{}, str.asString),
 	}
 }
 
@@ -47,4 +48,8 @@ func (self fnString) or(args []fnScope) (fnScope, error) {
 
 func (self fnString) eq(args []fnScope) (fnScope, error) {
 	return FnBool(self.Value() == args[0].Value()), nil
+}
+
+func (self fnString) asString(args []fnScope) (fnScope, error) {
+	return self, nil
 }
